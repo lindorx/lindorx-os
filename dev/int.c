@@ -255,7 +255,7 @@ void seccondary_ide_int(struct interrupt_frame* frame)
 
 
 /*初始化idt表*/
-void init_idt()
+void init_int()
 {
         //异常
         set_idt(0,ABORT_INT_0,OS_CODE_SEG,INTERRUPT_INT_TYPE,DPL_0,INTERRUPT_EFF);

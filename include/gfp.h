@@ -13,6 +13,7 @@ ZONE_HIGHMEM: 896M-4G
 #define ___GFP_PMEM     0x2     //从物理内存空间自动分配，此项用于申请临时内存区域
 #define ___GFP_PAGE     0x3     //为页表申请的内存
 #define ___GFP_VMEM      0x4     //从虚拟内存分配，0-4G的虚拟空间，这个空间的一部分可能在内存上，也可能在硬盘的交换分区上
+#define ___GFP_KERNEL    0x5    //从内核空间分配，即3G-4G的虚拟地址
 
 
 //linux下的

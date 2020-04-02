@@ -44,3 +44,25 @@ errno _usr_cpt(void *p)
         }
         return NULL;
 }
+
+//在页表中寻找可以被映射的地址
+//n:起始查询地址。num：需要查找从n开的页对应的页表开始查询，获取一块尚未映射的地址
+char *_get_mapaddr(void *n,uint num)
+{
+        pde_t *p=_page_index_addr(n),*bp;
+        uint i=0;
+        while(p<PAGE_TABLE_END_ADDR){//循环查找每一个页
+                for(bp=p;!_page_pte_isuse(p) && i<num;++i,++p);
+                if(i>=num)return _page_pte2page(bp);
+                i=0;
+        }
+        //如果返回NULL，说明没有找到
+        return NULL;
+}
+
+//在内核空间的页表中寻找可以被映射的地址
+/*方法：KERNEL_SPACE_BASE内核空间，在这里逐个寻找可用的地址空间*/
+char *_kernel_get_mapaddr()
+{
+        
+}

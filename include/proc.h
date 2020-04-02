@@ -60,7 +60,7 @@ struct proc {
   pde_t* pgdir;                // 页表地址，用于加载cr3
   char *kstack;                // 这个进程在内核的底栈
   enum procstate state;        // 进程状态
-  int pid;                     // 进程ID
+  pid_t pid;                     // 进程ID
   struct proc *parent;         // 父进程
   struct trapframe *tf;        // 用于当前进程的trap frame
   struct context *context;     // swtch()在此切换进程
@@ -82,7 +82,6 @@ struct task_list{
   ldt_t ldt[TASK_LDT_SZIE];//此任务的局部描述表
   seg_s ldts;//此ldt表在gdt的段选择子
   uint32 ldtsz;//ldt表项数量
-  
 };
 
 

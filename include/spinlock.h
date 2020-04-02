@@ -6,5 +6,5 @@ struct spinlock {
   // 调试：
   char *name;        // 锁名
   struct cpu *cpu;   // 持有锁的cpu
-  uint pcs[10];      // 锁定锁的调用堆栈
+  //uint pcs[10];      // 锁定锁的调用堆栈
 };

@@ -43,5 +43,3 @@ inline void set_idt(uint32 i,void (*off)(),uint16 selector,char type,char dpl,ch
 //IDTR寄存器重载
 //idt_num：idt表项目数量
 void asm_lidt(uint32 idt_num);
-//中断初始化
-void init_idt();

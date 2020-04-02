@@ -9,12 +9,13 @@
 #include<task.h>
 #include<mp.h>
 #include<ldt.h>
+//#include<lapic.h>
 
 #define NR_TASKS 1
 PROCESS proc_table[NR_TASKS];
 seg_sel ldt_s;
 
-void restart()
+/*void restart()
 {
         asm volatile("mov %1,%%esp\n\t"
 	"lldt %2\n\t"
@@ -30,7 +31,7 @@ void restart()
 	"g"((char*)proc_table),"m"(proc_table->ldt_sel),"g"(&(proc_table->ldt_sel))
         );
 return;
-}
+}*/
 
 void init_descriptor(ldt_t * p_desc,uint32 base,uint32 limit,uint16 att)
 {
@@ -97,22 +98,15 @@ int _system()
 {
         initsys_info();//初始化系统需要的信息
         init_mp();//初始化多处理器
-
         init_gdt();//重置gdt表
         sys_printk("init memory.\n");
         init_mem();//初始化内存
         sys_printk("init IDT table.\n");
-        init_idt();//初始化中断描述表
+        init_int();//初始化中断描述表
         sys_printk("init task.\n");
         init_task();//初始化任务
-        //测试
-        static GDTtable ldts[LDT_SIZE];
- 
-        //创建ldt
-        /*ldt_s=step_up_gdt(3,proc_table->ldts,sizeof(GDTtable)*LDT_SIZE,_GDT_TYPE_DATA_H_RW,_GDT_S_0,1,1,0,0,_GDT_G_BYTE);
-        init_pt();
-        PROCESS* p_proc_ready=proc_table;
-        restart();*/
+        sys_printk("entry initpro().\n");
+        restart();
         
         for(;;){
                 asm_cpu_hlt();

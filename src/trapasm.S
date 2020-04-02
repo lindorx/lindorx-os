@@ -1,8 +1,8 @@
-#include "mmu.h"
+#include <mmu.h>
 
   # vectors.S sends all traps here.
 .globl alltraps
-alltraps:
+/*alltraps:
   # Build trap frame.
   pushl %ds
   pushl %es
@@ -11,7 +11,7 @@ alltraps:
   pushal
   
   # Set up data segments.
-  movw $(SEG_KDATA<<3), %ax
+  movw $(SEG_KDATA << 3), %ax
   movw %ax, %ds
   movw %ax, %es
 
@@ -19,10 +19,10 @@ alltraps:
   pushl %esp
   call trap
   addl $4, %esp
-
+*/
   # Return falls through to trapret...
-.globl trapret
-trapret:
+.globl _trapret
+_trapret:
   popal
   popl %gs
   popl %fs

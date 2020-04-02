@@ -21,8 +21,6 @@ struct task_struct{
     
 };
 
-typedef int __pid_t;
-typedef __pid_t pid_t;//进程号类型，进程号不能为负数。
 
 extern pid_t _current_pid;//当前进程
 
@@ -33,7 +31,16 @@ pid_t _get_pid();
 
 //进程链表，每一个建立的进程都要加入此链表
 //在task.c定义
-extern struct task_list task;
+extern struct task_list *task;
 
 //在这里进入第一个任务
 int init_task();
+
+//获取一个任务空间
+struct task_list *alloctask();
+void freetask(struct task_list* t);
+
+void trapret();
+void forkret(void);
+//此程序将会从内核切换到第一个进程
+void restart();

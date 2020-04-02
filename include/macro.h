@@ -1,7 +1,5 @@
 #pragma once
 #include<type.h>
-#ifndef MACRO_H
-#define MACRO_H
 
 #define FALSE 0
 #define TRUE 1
@@ -9,7 +7,6 @@
 
 #define OS_CODE_SEG 	0x8		//系统代码段选择子
 #define OS_DATA_SEG 	0x10	//系统数据段选择子
-
 
 //磁盘类型
 #define DISK_TYPE_HDD 0x01	//这里假定为机械硬盘
@@ -30,6 +27,9 @@
 
 //内核定义
 #define KERNEL_ADDR 0xc0600000 						//内核物理地址
+#define KERNEL_SPACE_BASE 0xc0000000					//内核空间被映射的地址
+#define KERNEL_SPACE_BASE_PTA	(KERNEL_SPACE_BASE/MEMORY_PAGE_SIZE)	//内核空间在页表的起始位置
+
 //#define STACK_SIZE 0x1000 							//内核堆栈大小
 //#define KERNEL_VIRTUAL (0xC0000000+KERNEL_ADDR)		//内核虚拟地址
 #define KERNEL_SIZE (64*512)	//内核长度，单位：字节
@@ -37,8 +37,6 @@
 //初始加载完内核后的剩余空间起始位置
 //注意：这里是预先设定好的值，如果修改了其他内存占用，需要注意此值
 #define INITIALLY_UNUSED_MEMORY_ADDR 0x700000
-
-#endif
 
 #define BASE_MEMORY_CAPACITY (32*1024*1024)	//要求最小内存容量
 

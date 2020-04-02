@@ -18,14 +18,10 @@
 #define _SYS_MEM	0xc0000000
 #define _SYS_MEM_SIZE	0x40000000
 
-//内核页表定义,长度4M=0x400000+0x1000=0x401000
-#define PAGE_LIST_ADDR	0x100000		//页目录地址
-#define PAGE_TABLE_ADDR	0x101000		//页表地址
-#define PAGE_LIST_SIZE	0x401000		//页目录，页表总长
 #define _KERNEL_START_PAGE	((_SYS_MEM)/(MEMORY_PAGE_SIZE))	//内核起始页
-#define	PAGE_KERNEL_LIST	((PAGE_LIST_ADDR)+((_KERNEL_START_PAGE)>>12))	//内核页表在页目录的起始地址
+#define	PAGE_KERNEL_LIST	((PAGE_DIR_ADDR)+((_KERNEL_START_PAGE)>>12))	//内核页表在页目录的起始地址
 //内存分配表地址0x501000,大小设定为0x600000-0x501000=0xff00=1044480，差4kb就是1M
-#define MEMORY_ALLOC_ADDR (PAGE_LIST_ADDR+PAGE_LIST_SIZE)
+#define MEMORY_ALLOC_ADDR (PAGE_DIR_ADDR+PAGE_LIST_SIZE)
 #define MEMORY_ALLOC_SIZE (KERNEL_ADDR-MEMORY_ALLOC_ADDR)
 #define MEMORY_ALLOC_VIRTUAL (0xC0000000+0x1000) 				//显示缓冲区地址偏移0x1000字节
 
@@ -129,7 +125,7 @@ typedef struct kma_mem_list{
 }kma_mem_list;
 
 //空内存链表首节点
-extern free_mem_list  *_MEM_LIST_FIRST_NODE;
+//free_mem_list  *_MEM_LIST_FIRST_NODE;
 //释放从addr开始的2^order个页面
 //释放时应当与申请时的内存相同，否则可能会造成内存泄漏或者释放不该释放的内存
 void __free_pages(unsigned long addr, unsigned int order);

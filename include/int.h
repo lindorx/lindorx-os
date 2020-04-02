@@ -132,5 +132,9 @@ void seccondary_ide_int();
 #define INTERRUPT_46 primary_ide_int
 #define INTERRUPT_47 seccondary_ide_int
 
+//中断初始化
+void init_int();
+
+
 void key();
 void switch_to();
