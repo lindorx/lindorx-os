@@ -5,6 +5,7 @@
 #include<gdt.h>
 #include<page.h>
 #include<ldt.h>
+#include<spinlock.h>
 //进程状态
 enum procstate { UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
 
@@ -54,14 +55,16 @@ struct context {
   uint eip;
 };
 
+struct task_struct;
+
 //每个进程的状态
 struct proc {
   uint sz;                     // 进程内存大小
-  pde_t* pgdir;                // 页表地址，用于加载cr3
+  pte_t* pgdir;                // 页表地址，用于加载cr3
   char *kstack;                // 这个进程在内核的底栈
   enum procstate state;        // 进程状态
   pid_t pid;                     // 进程ID
-  struct proc *parent;         // 父进程
+  struct task_struct *parent;         // 父进程
   struct trapframe *tf;        // 用于当前进程的trap frame
   struct context *context;     // swtch()在此切换进程
   void *chan;                  // 如果是非零就睡眠
@@ -71,23 +74,12 @@ struct proc {
   char name[16];                 // 进程名称（调试使用）
 };
 
-//进程链
-struct task_list{
-  struct task_list *next1;//一级链，保存可执行进程
-  struct task_list *prev1;
-  struct task_list *next2;//二级链，保存所有进程
-  struct task_list *prev2;
-  struct proc proc;//进程结构
-  #define TASK_LDT_SZIE 3
-  ldt_t ldt[TASK_LDT_SZIE];//此任务的局部描述表
-  seg_s ldts;//此ldt表在gdt的段选择子
-  uint32 ldtsz;//ldt表项数量
-};
+#define TASK_LDT_SZIE 3
 
 
 //测试------------------------------------------------------
 
-typedef unsigned int t_32;
+/*typedef unsigned int t_32;
 typedef unsigned short t_16;
 
 typedef struct s_stackframe{
@@ -129,3 +121,31 @@ typedef struct s_proc{
 #define P_STACKTOP 72
 #define P_LDT_SEL 72
 #define p_LDT 76
+*/
+
+//将可运行的a任务加入一级链表
+#define task_run_insert(a) do{  \
+  (a)->prev1=(task);         \
+  (a)->next1=(task)->next1;  \
+  (task)->next1->prev1=(a);  \
+  (task)->next1=(a); \
+}while(0) 
+
+//将不可运行的a任务加入二级链
+#define task_notrun_insert(a) do{  \
+  (a)->prev2=(task);         \
+  (a)->next2=(task)->next2;  \
+  (task)->next2->prev2=(a);  \
+  (task)->next2=(a); \
+}while(0) 
+
+
+
+pid_t sys_fork(void);
+void forkret(void);
+void scheduler(void);
+
+void switchkvm();
+void switchuvm(struct task_struct *t);
+
+void yield();

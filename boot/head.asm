@@ -29,7 +29,7 @@ use16
 	mov es,ax
 	mov fs,ax
 	mov gs,ax
-	mov esp,KERNEL_ADDR
+	mov esp,KERNEL_STACK_PBOTADDR
 ;清空流水线，并串行化处理器
 	jmp dword 0x08:_start
 use32
@@ -156,7 +156,7 @@ PG_USU equ 4		;U/S属性，用户级
 	out 0xa1,al
 
 ;=============================================================
-;初始化定时器，
+;初始化计时器，
 	mov al,0x34
 	out 0x43,al
 	;mov eax,0x1234dc/500	;设定100Hz
@@ -207,9 +207,9 @@ PG_USU equ 4		;U/S属性，用户级
 ;加载kernel，并映射内核地址，内核位置由macro.inc中的宏给出
 
 mov ecx,KERNEL_SIZE/8+1	;页数
-mov ebx,0x101000+((V_INIT_ADDR-0x10000) shr 12)*4	;页表地址
+mov ebx,0x101000+(KERNEL_VADDR shr 12)*4	;页表地址
 
-mov eax,(KERNEL_ADDR-0x10000) or PG_P or PG_RWW or PG_USS	;被映射地址
+mov eax,KERNEL_PADDR or PG_P or PG_RWW or PG_USS	;被映射地址
 
 @@:
 	mov [ebx],eax
@@ -224,7 +224,7 @@ mov eax,(KERNEL_ADDR-0x10000) or PG_P or PG_RWW or PG_USS	;被映射地址
 ;loadkernel:
 ;	mov ebx,KERNEL_SECTOR
 ;	mov cl,KERNEL_SIZE
-;	mov edi,V_INIT_ADDR
+;	mov edi,KERNEL_VADDR
 ;	call read_disk
 ;cmp eax,0	;如果返回值为0，说明没有加载内核
 ;je spin
@@ -233,8 +233,18 @@ call LK_ADDR
 cmp eax,0
 je not_load_kernel
 
-mov esp,V_INIT_ADDR
-call eax	;将控制权交给内核
+;映射堆栈，将内核后一块内存作为堆栈
+mov edx,eax
+mov ecx,KERNEL_STACK_SIZE/PGSIZE;
+mov ebx,0x101000+(KERNEL_STACK_VADDR shr 12)*4
+mov eax,KERNEL_STACK_PADDR or PG_P or PG_RWW or PG_USS
+@@:
+	mov [ebx],eax
+	add ebx,4
+	add eax,0x1000
+	loop @b
+mov esp,KERNEL_STACK_VBOTADDR	;修改堆栈
+call edx	;将控制权交给内核
 
 spin:
 	hlt

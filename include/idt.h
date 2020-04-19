@@ -7,7 +7,7 @@
 
 //中断类型
 #define INTERRUPT_TASK_TYPE 0x5 //任务门,不使用
-#define INTERRUPT_INT_TYPE 0xf	//中断门，会修改IF位，屏蔽中断,0xe
+#define INTERRUPT_INT_TYPE 0xe	//中断门，会修改IF位，屏蔽中断,0xe
 #define INTERRUPT_TRAP_TYPE 0xf	//陷阱门，发生时一般不会修改IF位
 #define INTERRUPT_EFF 1		//中断有效
 #define INTERRUPT_INEFF 0	//中断无效
@@ -27,8 +27,9 @@ typedef struct _IDTTABLE{
 typedef _IDTTABLE idt_t;
 #pragma pack(pop)
 
+
 //在由IDT_ADDR指定的位置设置中断描述表项。
-inline void set_idt(uint32 i,void (*off)(),uint16 selector,char type,char dpl,char p)
+static inline void set_idt(uint32 i,void (*off)(),uint16 selector,char type,char dpl,char p)
 {
         ((_IDTTABLE *)IDT_ADDR)[i].offset_low=(uint16)(0xffff&(uint32)off);
         (( _IDTTABLE *)IDT_ADDR)[i].offset_high=(uint16)((uint32)off>>16);
@@ -39,7 +40,3 @@ inline void set_idt(uint32 i,void (*off)(),uint16 selector,char type,char dpl,ch
         (( _IDTTABLE *)IDT_ADDR)[i].dpl=dpl;
         (( _IDTTABLE *)IDT_ADDR)[i].present=p;
 }
-
-//IDTR寄存器重载
-//idt_num：idt表项目数量
-void asm_lidt(uint32 idt_num);

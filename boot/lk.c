@@ -5,13 +5,13 @@
 #include<_asm.h>
 typedef unsigned char uchar;
 #define SECTSIZE 512
-#define _KERNEL_ADDR 0x580000
-#define _KERNEL_OFF 64          //内核在硬盘的地址
-#define _KERNEL_SIZE 32*SECTSIZE
+#define _KERNEL_ADDR 0x580000   //内核elf文件被加载地址
+#define _KERNEL_OFF 64          //内核在硬盘的扇区
+//#define _KERNEL_SIZE 32*SECTSIZE  //内核大小
 
 extern void readseg(uchar*, uint, uint);
 
-unsigned long load_kernel()
+char *load_kernel()
 {
         Elf32_Ehdr *elf;
         Elf32_Phdr *ph,*eph;
@@ -33,9 +33,7 @@ unsigned long load_kernel()
                 if(ph->p_memsz > ph->p_filesz)
                         asm_stosb(pa+ph->p_filesz,0,ph->p_memsz - ph->p_filesz);
         }
-        //entry = (void(*)(void))(elf->e_entry);
-        //entry();
-return (unsigned long)elf->e_entry;
+return (char*)elf->e_entry;//返回内核地址
 }
 
 void

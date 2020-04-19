@@ -4,6 +4,7 @@
 #define FALSE 0
 #define TRUE 1
 #define NULL 0
+#define NULLPTR ((void *)NULL)
 
 #define OS_CODE_SEG 	0x8		//系统代码段选择子
 #define OS_DATA_SEG 	0x10	//系统数据段选择子
@@ -26,13 +27,34 @@
 #define START_TIME_YEAR 2019
 
 //内核定义
-#define KERNEL_ADDR 0xc0600000 						//内核物理地址
-#define KERNEL_SPACE_BASE 0xc0000000					//内核空间被映射的地址
-#define KERNEL_SPACE_BASE_PTA	(KERNEL_SPACE_BASE/MEMORY_PAGE_SIZE)	//内核空间在页表的起始位置
+#define KERNEL_SIZE (32*512)	//内核长度，单位：字节
+#define KERNEL_PADDR		0x600000		//内核物理地址
+#define KERNEL_ADDR		0xc0600000 						//内核物理地址
+#define KERNEL_SPACE_BASE	0xc0000000					//内核空间被映射的地址
+#define KERNEL_SPACE_BASE_STI	(KERNEL_SPACE_BASE/PGSIZE)		//内核空间在页表的起始项
+#define KERNEL_SPACE_BASE_PTA	(KERNEL_SPACE_BASE_STI*sizeof(pte_t))	//内核空间在页表的起始位置
+#define KERNEL_SPACE_SIZE	(0x100000000-0xc0000000)		//内核空间大小
+#define KERNEL_SPACE_NP		(KERNEL_SPACE_SIZE/PGSIZE)		//内核空间占用页数
+#define KERNEL_SPACE_PTN	KERNEL_SPACE_NP				//内核空间在页表占用的表项数
+#define KERNEL_SPACE_PDN	((KERNEL_SPACE_PTN*sizeof(pte_t))/PGSIZE)	//内核空间在页目录占用的表项数
 
-//#define STACK_SIZE 0x1000 							//内核堆栈大小
-//#define KERNEL_VIRTUAL (0xC0000000+KERNEL_ADDR)		//内核虚拟地址
-#define KERNEL_SIZE (64*512)	//内核长度，单位：字节
+#define KERNEL_SPACE_BASE_SDI	(KERNEL_SPACE_BASE_PTA/PGSIZE)		//内核空间在页目录的起始项
+#define KERNEL_SPACE_BASE_PDA	(KERNEL_SPACE_BASE_DI*sizeof(pde_t))	//内核空间在页目录的起始位置
+
+#define KERNEL_STACK_SIZE	(32*4096)	//内核堆栈大小
+#define KERNEL_STACK_PADDR	(KERNEL_PADDR+KERNEL_SIZE)		//内核堆栈物理地址
+#define KERNEL_STACK_VADDR 	(KERNEL_STACK_PADDR+KERNEL_SPACE_BASE)	//内核堆栈虚拟地址
+#define KERNEL_STACK_PBOTADDR	(KERNEL_STACK_PADDR+KERNEL_STACK_SIZE)	//内核堆栈底栈物理地址
+#define KERNEL_STACK_VBOTADDR	(KERNEL_STACK_VADDR+KERNEL_STACK_SIZE)	//内核堆栈底栈虚拟地址
+
+//用户空间
+#define USER_ADDR	0
+#define USER_SZ	(KERNEL_SPACE_BASE-USER_ADDR)	//用户空间长度
+#define USER_PSZ (USER_SZ/PGSIZE)		//用户空间占用页数
+
+//地址
+#define P2V(a) ((void *)((char*)(a)+KERNEL_SPACE_BASE))	//将物理地址转换为虚拟地址
+#define V2P(va) ((uint)(va)-KERNEL_SPACE_BASE)	//虚拟地址转换为物理地址
 
 //初始加载完内核后的剩余空间起始位置
 //注意：这里是预先设定好的值，如果修改了其他内存占用，需要注意此值
@@ -60,4 +82,9 @@ typedef int ptr_t;
 	(a)->next=(b)->next;\
 	(b)->next->prev=(a);\
 	(b)->next=(a);\
+}while(0)
+
+//停止程序执行
+#define hlt1() do{		\
+	for(;;)asm_cpu_hlt();	\
 }while(0)

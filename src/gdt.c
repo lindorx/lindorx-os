@@ -31,7 +31,6 @@ uint16 step_up_gdt(uint32 i,    //指定位置
 		byte G)	//G=0，段限长单位是字节，G=1，单位是4kb
 {
         //static int i=3;//指向当前未被设定的gdt位置
-        GDTtable * gdt=GDT_ADDR;
         gdt[i].limit0=(uint16)limit;
         gdt[i].limit1=(uint8)(limit>>16);
         gdt[i].base0=(uint16)base;

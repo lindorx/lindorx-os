@@ -3,8 +3,10 @@
 
 //内存块结构
 typedef struct mem_block{
-        ptr_t start;//该内存块起始地址
-        ptr_t end;//结束地址
+        char *pstart;//该内存块起始地址
+        char *vstart;//内存块的虚拟地址
+        char *pend;//内存块的结束地址
+        char *vend;//内存块结束的虚拟地址
         uint size;//大小，size=start-end;单位：byte
 }mem_block;
 //这里声明会用到的系统信息，并在test.c定义
@@ -51,16 +53,9 @@ extern uint32 _TIME_BASE_CENTURY_YEAR;//世纪,2000
 
 /*内核相关*/
 extern mem_block _KERNEL_INFO;
-/*extern uint32 _KERNEL_START_ADDR;//内核起始地址
-extern uint32 _KERNEL_END_ADDR;//内核结束地址
-extern uint32 _KERNEL_SIZE;//内核长度
-*/
 
 /*中断相关*/
 mem_block _INT;
 extern uint32 _INT_START_ADDR;//中断起始地址
 
 void initsys_info();
-
-//第一个程序
-void initpro();

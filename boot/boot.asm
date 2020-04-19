@@ -17,37 +17,37 @@ _start:
 	mov ax,0x03
 	int 0x10
 ;记录系统开机时间，读取cmos,存放在0xff0,占用8字节：$|秒|分|时|日|月|年|$
-	mov byte [START_CMOS_TIME],'$'
-	mov al,0
-	out 0x70,al
-	in al,0x71		;秒
-	mov [START_CMOS_TIME+1],al
-
-	mov al,2
-	out 0x70,al
-	in al,0x71		;分
-	mov [START_CMOS_TIME+2],al
-
-	mov al,4		;时
-	out 0x70,al
-	in al,0x71
-	mov [START_CMOS_TIME+3],al
-
-	mov al,7		;日
-	out 0x70,al
-	in al,0x71
-	mov [START_CMOS_TIME+4],al
-	
-	mov al,8		;月
-	out 0x70,al
-	in al,0x71
-	mov [START_CMOS_TIME+5],al
-
-	mov al,9		;年
-	out 0x70,al
-	in al,0x71
-	mov [START_CMOS_TIME+6],al
-	mov byte [START_CMOS_TIME+7],'$'
+;	mov byte [START_CMOS_TIME],'$'
+;	mov al,0
+;	out 0x70,al
+;	in al,0x71		;秒
+;	mov [START_CMOS_TIME+1],al
+;
+;	mov al,2
+;	out 0x70,al
+;	in al,0x71		;分
+;	mov [START_CMOS_TIME+2],al
+;
+;	mov al,4		;时
+;	out 0x70,al
+;	in al,0x71
+;	mov [START_CMOS_TIME+3],al
+;
+;	mov al,7		;日
+;	out 0x70,al
+;	in al,0x71
+;	mov [START_CMOS_TIME+4],al
+;	
+;	mov al,8		;月
+;	out 0x70,al
+;	in al,0x71
+;	mov [START_CMOS_TIME+5],al
+;
+;	mov al,9		;年
+;	out 0x70,al
+;	in al,0x71
+;	mov [START_CMOS_TIME+6],al
+;	mov byte [START_CMOS_TIME+7],'$'
 
 ;使用bios加载head
 	mov ax,0x0200+HEAD_SIZE	;ah=2,读扇区；al=15,读取扇区数
@@ -90,8 +90,7 @@ _start:
 ;	mov gs,ax
 ;	mov fs,ax
 ;	mov esp,0x600000
-;清空流水线，并串行化处理器
-;	jmp dword 0x08:__head
+
 
 	jmp __head
 ;spin:

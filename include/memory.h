@@ -1,7 +1,7 @@
 #pragma once
 #include<macro.h>
 #include<_asm.h>
-#include<init.h>
+#include<initsi.h>
 #include<gfp.h>
 #include<errno.h>
 #include<idt.h>
@@ -73,9 +73,6 @@ static inline void jmp_v(void* addr)
 
 //内存探查程序，返回可用页数
 uint32 TakeMemorySize();
-
-#define BASE_PAGE_SIZE 4096	//基准页大小
-
 void * sys_malloc(size_t size);
 
 //初始内存链表地址
@@ -120,15 +117,12 @@ typedef struct free_mem_list{
 #endif
 }free_mem_list;
 
-typedef struct kma_mem_list{
-	
-}kma_mem_list;
 
 //空内存链表首节点
 //free_mem_list  *_MEM_LIST_FIRST_NODE;
 //释放从addr开始的2^order个页面
 //释放时应当与申请时的内存相同，否则可能会造成内存泄漏或者释放不该释放的内存
-void __free_pages(unsigned long addr, unsigned int order);
+void __free_pages(void* addr, unsigned int order);
 //获取指定数量的空闲页
 //gfp_mask：内存域修饰标志，order：分配2^order个页面
 unsigned long __get_free_pages(gfp_t gfp_mask, unsigned int order);
@@ -142,3 +136,10 @@ void * __kmalloc(size_t size);
 void __kfree(void *addr);
 //初始化内存
 char* init_mem();
+
+//通过检查页表查询内核之后没有占用的物理内存
+char* _get_pmem_start();
+
+//在内核空间获取一页内存
+void *kalloc();
+void kfree(void *a);

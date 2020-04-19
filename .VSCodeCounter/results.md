@@ -1,32 +1,33 @@
 # Summary
 
-Date : 2020-04-02 19:16:32
+Date : 2020-04-15 21:06:38
 
 Directory c:\Users\代凡\Documents\代码\system\lindorx
 
-Total : 80 files,  8806 codes, 1404 comments, 1334 blanks, all 11544 lines
+Total : 88 files,  9017 codes, 1611 comments, 1363 blanks, all 11991 lines
 
 [details](details.md)
 
 ## Languages
 | language | files | code | comment | blank | total |
 | :--- | ---: | ---: | ---: | ---: | ---: |
-| C++ | 43 | 3,908 | 942 | 664 | 5,514 |
-| C | 25 | 3,485 | 423 | 400 | 4,308 |
-| Assembler file | 5 | 1,245 | 0 | 211 | 1,456 |
-| Makefile | 6 | 139 | 38 | 53 | 230 |
+| C | 29 | 3,813 | 463 | 422 | 4,698 |
+| C++ | 46 | 3,768 | 1,108 | 669 | 5,545 |
+| Assembler file | 5 | 1,261 | 0 | 213 | 1,474 |
+| Makefile | 6 | 143 | 39 | 53 | 235 |
 | Python | 1 | 29 | 1 | 6 | 36 |
+| Markdown | 1 | 3 | 0 | 0 | 3 |
 
 ## Directories
 | path | files | code | comment | blank | total |
 | :--- | ---: | ---: | ---: | ---: | ---: |
-| . | 80 | 8,806 | 1,404 | 1,334 | 11,544 |
+| . | 88 | 9,017 | 1,611 | 1,363 | 11,991 |
 | app | 1 | 6 | 2 | 1 | 9 |
 | bin | 1 | 13 | 2 | 4 | 19 |
-| boot | 8 | 1,347 | 22 | 236 | 1,605 |
-| dev | 12 | 2,604 | 249 | 310 | 3,163 |
-| include | 37 | 3,468 | 770 | 612 | 4,850 |
+| boot | 8 | 1,362 | 21 | 238 | 1,621 |
+| dev | 12 | 2,676 | 256 | 313 | 3,245 |
+| include | 40 | 3,328 | 936 | 617 | 4,881 |
 | obj | 1 | 7 | 3 | 4 | 14 |
-| src | 19 | 1,275 | 330 | 139 | 1,744 |
+| src | 23 | 1,532 | 364 | 158 | 2,054 |
 
 [details](details.md)

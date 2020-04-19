@@ -1,4 +1,7 @@
 #include<type.h>
-#include<init.h>
+#include<initsi.h>
 
-//通过一个函数获取公共参数
+int iprint(const char *s,...)
+{
+        return 0;
+}

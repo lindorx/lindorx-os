@@ -5,3 +5,6 @@ void* memcpy(void *destin,void *source,unsigned int n);
 size_t strlen(const char* str);
 //将指定内存块设置为指定的值
 void *memset(void *src,int val,size_t n);
+
+//安全的字符串复制
+char * safestrcpy(char *s,const char *t,int n);

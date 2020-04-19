@@ -5,14 +5,18 @@
 #include<task.h>
 #include<cpu.h>
 #include<sysio.h>
-//#include<lapic.h>
+#include<program.h>
 #include<string.h>
+#include<panic.h>
+#include<proc.h>
+#include<syscall.h>
 
 extern int ncpu;//当前cpu数量
 
-struct TSS32 tss;//tss段
+struct TSS32 tss={0};//tss段
 
-struct task_list *task;//任务链根节点。这是进程链表的创建的第一个节点
+struct task_struct *task=NULL;//任务链根节点。这是进程链表的创建的第一个节点
+struct task_struct *nowtask=NULL;//指向当前任务
 
 //任务ldt表
 #define _TASK_LDT_CS 0	//任务代码段在其ldt的下标
@@ -28,12 +32,23 @@ struct task_list *task;//任务链根节点。这是进程链表的创建的第�
 int init_task()
 {
 	task=alloctask();
+	sys_printk("init_task():task=0x%x\n",task);
+	if(task==NULL)
+		panic("init_task:alloctask() error.");
+	tasklist.task=task;
 	//初始化任务的局部描述表
-	task->ldts=step_up_gdt(3,task->ldt,sizeof(GDTtable)*LDT_SIZE,_GDT_TYPE_DATA_H_RW,_GDT_S_0,1,1,0,0,_GDT_G_BYTE);
+	task->ldts=step_up_gdt(3,task->ldt,sizeof(GDTtable)*TASK_LDT_SZIE,_GDT_TYPE_DATA_H_RW,_GDT_S_0,1,1,0,0,_GDT_G_BYTE);
 	memcpy(&(task->ldt[_TASK_LDT_CS]),&gdt[OS_CODE_SEG>>3],sizeof(ldt_t));
 	task->ldt[_TASK_LDT_CS].DPL=_FIRST_TASK_DPL;
 	memcpy(&(task->ldt[_TASK_LDT_DS]),&gdt[OS_DATA_SEG>>3],sizeof(ldt_t));
 	task->ldt[_TASK_LDT_DS].DPL=_FIRST_TASK_DPL;
+	task->ldtsz=TASK_LDT_SZIE;
+	//初始化进程
+	task->proc.sz=1;
+	task->proc.pgdir=PAGE_DIR_VA;
+	memset(task->proc.name,"initpro",8);
+	task->next1=task;
+	task->prev1=task;
 	//设置段寄存器
 	task->proc.tf->cs=_FIRST_TASK_CS;
 	task->proc.tf->ds=_FIRST_TASK_DS;
@@ -55,6 +70,8 @@ int init_task()
         "ltr %%ax\n\t"
         ::"m"(tss_s));
 	sys_printk("install tss done.\n");
+	sys_printk("entry initpro().\n");
+	nowtask=task;
    return 0;     
 }
 
@@ -69,7 +86,7 @@ void restart()
 	"pop %%fs\n\t"
 	"pop %%es\n\t"
 	"pop %%ds\n\t"
-	"add $4,%%esp\n\t"	//跳过trapno
+	"add $8,%%esp\n\t"	//跳过trapno
 	"iret\n\t"
 	:"=m"(tss.esp0)
 	:"g"((char*)task->proc.tf),	//进程的trapframe
@@ -126,21 +143,25 @@ return;
 }
 
 //获取一个任务空间
-struct task_list *alloctask()
+struct task_struct *alloctask()
 {
-	struct task_list *t;
+	struct task_struct *t;
 	static pid_t nextpid=0;
-	t=(struct task_list*)__kmalloc(sizeof(struct task_list));
+	//获取一块内存储存进程结构
+	t=(struct task_struct*)__kmalloc(sizeof(struct task_struct));
+	sys_printk("alloctask():t=0x%x\n",t);
 	if(t==NULL)return NULL;
-	memset(t,0,sizeof(struct task_list));
+	memset(t,0,sizeof(struct task_struct));
 	t->proc.state=EMBRYO;
 	t->proc.pid=nextpid++;
 	char *sp;
 	t->proc.kstack=__get_free_pages(___GFP_PMEM,_PROC_STACK_PAGES_ORDER);
+	sys_printk("alloctask:t->proc.kstack=%x\n",t->proc.kstack);
 	if(t->proc.kstack==NULL){
 		__kfree(t);
-		return (struct task_list*)NULL;
+		return (struct task_struct*)NULL;
 	}
+	
 	sp=(char*)(t->proc.kstack)+KSTACK_SIZE;
 	sp-=sizeof(struct trapframe);
 	t->proc.tf=(struct trapframe*)sp;
@@ -152,28 +173,25 @@ struct task_list *alloctask()
 	t->proc.context->eip=(uint)forkret;
 	return t;
 }
-void freetask(struct task_list* t)
+void freetask(struct task_struct* t)
 {
 	__free_pages(t->proc.kstack,_PROC_STACK_PAGES_ORDER);
 	__kfree(t);
 return;
 }
 
-void
-forkret(void)
+extern pid_t fork_pid;
+pid_t fork()
 {
-  static int first = 1;
-  // Still holding ptable.lock from scheduler.
-  //release(&ptable.lock);
+	pid_t pid=0;
+	asm volatile("int $0x80"
+	:"=a"(pid)
+	:"a"(syscall_fork));
+	return pid;
+}
 
-  if (first) {
-    // Some initialization functions must be run in the context
-    // of a regular process (e.g., they call sleep), and thus cannot
-    // be run from main().
-    first = 0;
-    //iinit(ROOTDEV);
-    //initlog(ROOTDEV);
-  }
-
-  // Return to "caller", actually trapret (see allocproc).
+//
+struct task_struct *mytask()
+{
+	return nowtask;
 }

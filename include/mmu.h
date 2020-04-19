@@ -3,7 +3,9 @@
 
 // Eflags register
 #define FL_IF           0x00000200      // Interrupt Enable
+#define PGSIZE          4096    // bytes mapped by a page
 
+/*
 // Control Register flags
 #define CR0_PE          0x00000001      // Protection Enable
 #define CR0_WP          0x00010000      // Write Protect
@@ -101,7 +103,7 @@ struct segdesc {
 #define PTE_FLAGS(pte)  ((uint)(pte) &  0xFFF)
 
 #ifndef __ASSEMBLER__
-typedef uint pte_t;
+//typedef uint pte_t;
 
 // Task state segment format
 struct taskstate {
@@ -179,3 +181,4 @@ struct gatedesc {
 }
 
 #endif
+*/

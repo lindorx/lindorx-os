@@ -1,7 +1,7 @@
 //此文件为系统标准输入输出文件
 //包含磁盘io，显示设备io等
 #include<sysio.h>
-#include<init.h>
+#include<initsi.h>
 #include<vadefs.h>
 #include<string.h>
 
@@ -148,6 +148,8 @@ int put_ctlch(int ch,struct TEXT_DISPLPY_CHAR* dp,int cursor_pos,int width,int h
                 if(cursor_pos>width*(height-1)){//如果此时下标在最后一行，则将下标提前，同时将前面的缓冲区整体移动
                         cursor_pos-=cursor_pos%width;
                         memcpy(dp,dp+width,width*(height-1)*sizeof(struct TEXT_DISPLPY_CHAR));
+                        //清空最后一行
+                        memset(dp+width*(height-1),0,width*sizeof(struct TEXT_DISPLPY_CHAR));
                 }
                 else cursor_pos=(cursor_pos-cursor_pos%width)+width;
                 }break;
@@ -203,6 +205,12 @@ int uitoas(unsigned int num,char *str,int cardinal)
         return num;
 }
 
+//输出一行字符串
+/*size_t sys_printl(const char* str,...)
+{
+        
+}
+*/
 //磁盘操作
 
 //读取指定磁盘的扇区

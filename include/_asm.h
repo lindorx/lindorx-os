@@ -157,17 +157,26 @@ static inline void asm_ltr(uint16 ax)
     __asm__ __volatile__("ltr %%ax"::"a"(ax));
 }
 #pragma pack(1)
-struct lgdt_s{
+struct load_struct{
         unsigned short size;
-        void *gdt;
+        void *addr;
 };
+
 #pragma pack()
 static inline void asm_lgdt(unsigned short size, void *gdt)
 {
-        struct lgdt_s l;
+        struct load_struct l;
         l.size=size;
-        l.gdt=gdt;
+        l.addr=gdt;
     __asm__ __volatile__("lgdt %0"::"m"(l));
+}
+
+static inline void asm_lidt(unsigned short size,void *idt)
+{
+        struct load_struct l;
+        l.size=size;
+        l.addr=idt;
+    __asm__ __volatile__("lidt %0"::"m"(l));
 }
 
 #endif

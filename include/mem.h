@@ -12,6 +12,4 @@
 #define __MAM_KERNEL_SIZE       (512*1024*1024)         //大小，单位：byte
 
 //__get_free_pages()
-#define __PMEM_START         //未被内核占用的物理内存起始地址
-#define __MAM_KERNEL_SIZE       //起始地址
 #define __MAM_GFP_SIZE          (3*1024*1024*1024)      //大小，单位：byte

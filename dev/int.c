@@ -1,5 +1,11 @@
 #include<int.h>
 #include<idt.h>
+#include<task.h>
+#include<syscall.h>
+
+idt_t *idt=(idt_t*)P2V(IDT_ADDR);
+
+pid_t fork_pid=0;
 //向控制台打印发生的中断号，并使cpu暂停
 #define _INT_TEST(int_num) do{  \
         asm volatile("mov $0x10,%eax\n\t"\
@@ -157,7 +163,8 @@ void streaming_simd_ext(struct interrupt_frame* frame,uword_t error_code)//int 1
 __attribute__ ((interrupt))
 void timer_int(struct interrupt_frame* frame)
 {
-        _INT_TEST(32);
+        //_INT_TEST(32);
+        scheduler();
 }
 //键盘中断 int 0x21
 __attribute__ ((interrupt))
@@ -251,51 +258,165 @@ void seccondary_ide_int(struct interrupt_frame* frame)
         _INT_TEST(47);
 }
 
+//系统调用表
+int syscall_table(uint n,uint eip,uint cs,uint eflags)
+{
+        if(n>5)return -1;
+        struct task_struct *t=mytask();
+        sys_printk("syscall_table:n=%d\n",n);
+        sys_printk("syscall_fork:eip=0x%x,cs=0x%x,eflags=0x%x\n",eip,cs,eflags);
+        asm_cpu_hlt();
+        switch(n){
+                case syscall_fork:{
+                         //更新当前进程的trapframe
+                t->proc.tf->eip=eip;
+                t->proc.tf->cs=cs;
+                t->proc.tf->eflags=eflags;
+                
+                return sys_fork();
+                }
+                break;
+                case 0:{
+                        for(;;)
+                                asm_cpu_hlt();
+                }
+
+        }
+return -1;
+}
 /*这里为中断处理函数，所有发生的中断跳转到这里来进行处理*/
+//软件中断
+#pragma push_options
+#pragma GCC optimize ("O2")
+//__attribute__ ((interrupt))
+void syscall(struct interrupt_frame* frame)
+{       
+        asm volatile(
+                "push %3\n\t"
+                "push %2\n\t"
+                "push %1\n\t"
+                "push %%eax\n\t"
+                "call %0\n\t"
+                "add $16,%%esp\n\t"
+                "iret\n\t"
+                ::"m"(syscall_table),
+                "m"(frame->eip),
+                "m"(frame->cs),
+                "m"(frame->eflags) 
+                );
+       /* //sys_printk("int 0x80\n");
+        int eax,pid;
+        asm volatile("mov %%eax,%0":"=a"(eax));
+        struct task_struct *t=mytask();
+        //sys_printk("syscall:eax=0x%x\n",eax);
+        switch(eax){
+                case syscall_fork:{
+                         //更新当前进程的trapframe
+                t->proc.tf->eip=frame->eip;
+                t->proc.tf->cs=frame->cs;
+                t->proc.tf->eflags=frame->eflags;
+                fork_pid=sys_fork();
+                }
+                break;
+                case 0:{
+                        for(;;)
+                                asm_cpu_hlt();
+                }
+                default:
+                        return;
+        }
+        asm volatile("mov %0,%%eax"::"m"(fork_pid));*/
+}
+#pragma pop_options
+
+void * int_fun[INTRE_NUM]={
+        div_error,              //0     0x0
+        debug_error,            //1     0x1
+        nmi_interrupt,          //2     0x2
+        breakpoint_int,         //3     0x3
+        overflow,               //4     0x4
+        bound_range,            //5     0x5
+        undefined_opcode,       //6     0x6
+        no_math_cp,             //7     0x7
+        double_fault,           //8     0x8
+        coprocessor_seg_error,  //9     0x9
+        invalid_tss,            //10    0xa
+        seg_not_present,        //11    0xb
+        stack_seg_error,        //12    0xc
+        general_protection,     //13    0xd
+        page_fault,             //14    0xe
+        _do_not_use_15,         //15    0xf
+        math_fault ,            //16    0x10
+        align_check,            //17    0x11
+        machine_check,          //18    0x12
+        streaming_simd_ext,     //19    0x13
+        NULLPTR,NULLPTR,NULLPTR,NULLPTR,NULLPTR,NULLPTR,
+        NULLPTR,NULLPTR,NULLPTR,NULLPTR,NULLPTR,NULLPTR,
+//中断
+        timer_int,              //32    0x20
+        key_int,                //33    0x21
+        _irq9,                  //34    0x22
+        com2_int,               //35    0x23
+        com1_int,               //36    0x24
+        lptr2_int,              //37    0x25
+        fdd_int,                //38    0x26
+        lpt1_int,               //39    0x27
+        cmos_alert_int,         //40    0x28
+        _irq2,                  //41    0x29
+        reversed1_int,          //42    0x2a
+        reversed2_int,          //43    0x2b
+        ps_2_mouse_int,         //44    0x2c
+        fpu_int,                //45    0x2d
+        primary_ide_int,        //46    0x2e
+        seccondary_ide_int,     //47    0x2f
+        NULLPTR,NULLPTR,NULLPTR,NULLPTR,NULLPTR,NULLPTR,
+        NULLPTR,NULLPTR,NULLPTR,NULLPTR,NULLPTR,NULLPTR,
+        NULLPTR,NULLPTR,NULLPTR,NULLPTR,NULLPTR,NULLPTR,
+        NULLPTR,NULLPTR,NULLPTR,NULLPTR,NULLPTR,NULLPTR,
+        NULLPTR,NULLPTR,NULLPTR,NULLPTR,NULLPTR,NULLPTR,
+        NULLPTR,NULLPTR,NULLPTR,NULLPTR,NULLPTR,NULLPTR,
+        NULLPTR,NULLPTR,NULLPTR,NULLPTR,NULLPTR,NULLPTR,
+        NULLPTR,NULLPTR,NULLPTR,NULLPTR,NULLPTR,NULLPTR,
+        NULLPTR,NULLPTR,NULLPTR,NULLPTR,NULLPTR,NULLPTR,
+        NULLPTR,NULLPTR,NULLPTR,NULLPTR,NULLPTR,NULLPTR,
+        NULLPTR,NULLPTR,NULLPTR,NULLPTR,NULLPTR,NULLPTR,
+        NULLPTR,NULLPTR,NULLPTR,NULLPTR,NULLPTR,NULLPTR,
+        NULLPTR,NULLPTR,NULLPTR,NULLPTR,NULLPTR,NULLPTR,
+        NULLPTR,NULLPTR,
+        syscall                 //128   0x80
+};
+
 
 
 /*初始化idt表*/
 void init_int()
 {
         //异常
-        set_idt(0,ABORT_INT_0,OS_CODE_SEG,INTERRUPT_INT_TYPE,DPL_0,INTERRUPT_EFF);
-        set_idt(1,ABORT_INT_1,OS_CODE_SEG,INTERRUPT_INT_TYPE,DPL_0,INTERRUPT_EFF);
-        set_idt(2,ABORT_INT_2,OS_CODE_SEG,INTERRUPT_INT_TYPE,DPL_0,INTERRUPT_EFF);
-        set_idt(3,ABORT_INT_3,OS_CODE_SEG,INTERRUPT_INT_TYPE,DPL_0,INTERRUPT_EFF);
-        set_idt(4,ABORT_INT_4,OS_CODE_SEG,INTERRUPT_INT_TYPE,DPL_0,INTERRUPT_EFF);
-        set_idt(5,ABORT_INT_5,OS_CODE_SEG,INTERRUPT_INT_TYPE,DPL_0,INTERRUPT_EFF);
-        set_idt(6,ABORT_INT_6,OS_CODE_SEG,INTERRUPT_INT_TYPE,DPL_0,INTERRUPT_EFF);
-        set_idt(7,ABORT_INT_7,OS_CODE_SEG,INTERRUPT_INT_TYPE,DPL_0,INTERRUPT_EFF);
-        set_idt(8,ABORT_INT_8,OS_CODE_SEG,INTERRUPT_INT_TYPE,DPL_0,INTERRUPT_EFF);
-        set_idt(9,ABORT_INT_9,OS_CODE_SEG,INTERRUPT_INT_TYPE,DPL_0,INTERRUPT_EFF);
-        set_idt(10,ABORT_INT_10,OS_CODE_SEG,INTERRUPT_INT_TYPE,DPL_0,INTERRUPT_EFF);
-        set_idt(11,ABORT_INT_11,OS_CODE_SEG,INTERRUPT_INT_TYPE,DPL_0,INTERRUPT_EFF);
-        set_idt(12,ABORT_INT_12,OS_CODE_SEG,INTERRUPT_INT_TYPE,DPL_0,INTERRUPT_EFF);
-        set_idt(13,ABORT_INT_13,OS_CODE_SEG,INTERRUPT_INT_TYPE,DPL_0,INTERRUPT_EFF);
-        set_idt(14,ABORT_INT_14,OS_CODE_SEG,INTERRUPT_INT_TYPE,DPL_0,INTERRUPT_EFF);
-        set_idt(15,ABORT_INT_15,OS_CODE_SEG,INTERRUPT_INT_TYPE,DPL_0,INTERRUPT_EFF);
-        set_idt(16,ABORT_INT_16,OS_CODE_SEG,INTERRUPT_INT_TYPE,DPL_0,INTERRUPT_EFF);
-        set_idt(17,ABORT_INT_17,OS_CODE_SEG,INTERRUPT_INT_TYPE,DPL_0,INTERRUPT_EFF);
-        set_idt(18,ABORT_INT_18,OS_CODE_SEG,INTERRUPT_INT_TYPE,DPL_0,INTERRUPT_EFF);
-        set_idt(19,ABORT_INT_19,OS_CODE_SEG,INTERRUPT_INT_TYPE,DPL_0,INTERRUPT_EFF);
-
+        int i;
+        for(i=0;i<32;++i){
+                set_idt(i,int_fun[i],OS_CODE_SEG,INTERRUPT_INT_TYPE,DPL_0,INTERRUPT_EFF); 
+        }
         //中断
-        set_idt(32,INTERRUPT_32,OS_CODE_SEG,INTERRUPT_INT_TYPE,DPL_0,INTERRUPT_EFF);
-        set_idt(33,INTERRUPT_33,OS_CODE_SEG,INTERRUPT_INT_TYPE,DPL_0,INTERRUPT_EFF);
-        set_idt(34,INTERRUPT_34,OS_CODE_SEG,INTERRUPT_INT_TYPE,DPL_0,INTERRUPT_EFF);
-        set_idt(35,INTERRUPT_35,OS_CODE_SEG,INTERRUPT_INT_TYPE,DPL_0,INTERRUPT_EFF);
-        set_idt(36,INTERRUPT_36,OS_CODE_SEG,INTERRUPT_INT_TYPE,DPL_0,INTERRUPT_EFF);
-        set_idt(37,INTERRUPT_37,OS_CODE_SEG,INTERRUPT_INT_TYPE,DPL_0,INTERRUPT_EFF);
-        set_idt(38,INTERRUPT_38,OS_CODE_SEG,INTERRUPT_INT_TYPE,DPL_0,INTERRUPT_EFF);
-        set_idt(39,INTERRUPT_39,OS_CODE_SEG,INTERRUPT_INT_TYPE,DPL_0,INTERRUPT_EFF);
-        set_idt(40,INTERRUPT_40,OS_CODE_SEG,INTERRUPT_INT_TYPE,DPL_0,INTERRUPT_EFF);
-        set_idt(41,INTERRUPT_41,OS_CODE_SEG,INTERRUPT_INT_TYPE,DPL_0,INTERRUPT_EFF);
-        set_idt(42,INTERRUPT_42,OS_CODE_SEG,INTERRUPT_INT_TYPE,DPL_0,INTERRUPT_EFF);
-        set_idt(43,INTERRUPT_43,OS_CODE_SEG,INTERRUPT_INT_TYPE,DPL_0,INTERRUPT_EFF);
-        set_idt(44,INTERRUPT_44,OS_CODE_SEG,INTERRUPT_INT_TYPE,DPL_0,INTERRUPT_EFF);
-        set_idt(45,INTERRUPT_45,OS_CODE_SEG,INTERRUPT_INT_TYPE,DPL_0,INTERRUPT_EFF);
-        set_idt(46,INTERRUPT_46,OS_CODE_SEG,INTERRUPT_INT_TYPE,DPL_0,INTERRUPT_EFF);
-        set_idt(47,INTERRUPT_47,OS_CODE_SEG,INTERRUPT_INT_TYPE,DPL_0,INTERRUPT_EFF);
+        for(;i<0x80;++i){
+                set_idt(i,int_fun[i],OS_CODE_SEG,INTERRUPT_INT_TYPE,DPL_0,INTERRUPT_INEFF);
+        }
+        //注册系统调用
+        set_idt(0x80,int_fun[0x80],OS_CODE_SEG,INTERRUPT_TRAP_TYPE,DPL_0,INTERRUPT_EFF);
+        asm_lidt(INTRE_NUM*sizeof(idt_t)-1,(void*)P2V(IDT_ADDR));
 return;
 }
 
+//放开指定硬件中断
+int open_intn(uint n)
+{
+        if(n<32 || n>47)
+                return -1;
+        idt[n].present=1;
+}
+
+int close_intn(uint n)
+{
+        if(n<32 || n>47)
+                return -1;
+        idt[n].present=0;
+}

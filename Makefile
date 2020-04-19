@@ -20,6 +20,7 @@ OBJDIR=obj
 BINDIR=bin
 DEVDIR=dev
 BOOTDIR=boot
+DEPDIR=dep
 
 #>>>内核所需文件
 #boot文件
@@ -63,6 +64,8 @@ COFF_TO_ELF=-O elf32-i386	#将coff格式转换为elf格式
 LDLIST=-m i386pe -N -Ttext 0xc0600000 -e __system -o
 #头文件目录
 CC_INCLUDE=-I $(ROOTDIR)/include
+#生成依赖文件
+CC_DEPS=-MMD -MP -MF ${patsubst $(OBJDIR)/%.o,$(DEPDIR)/%.d,$@}
 #普通.c编译参数
 CCLIST=-nostdinc -O2\
 	-Werror \
@@ -70,13 +73,15 @@ CCLIST=-nostdinc -O2\
 	-Wall -Wno-format -Wno-unused -Wno-array-bounds -Wno-int-conversion\
 	-gstabs -m32\
 	-DJOS_KERNEL -c \
-	$(CC_INCLUDE)
+	$(CC_INCLUDE)	\
+	$(CC_DEPS)
+
 #中断文件编译参数（dev/int.c）
 CC_INT_LIST=-O2 -mgeneral-regs-only -c $(CC_INCLUDE)
 
-
-
 all: $(IMG)
+
+-include $(DEPDIR)/*.d
 
 #>>>编译内核
 $(IMG): $(KBIN) $(BOOTLODER) 
@@ -110,11 +115,11 @@ $(KBIN):$(KOFILES) $(KINTOFS)
 	objcopy $(COFF_TO_ELF) $(ROOTDIR)/$(BINDIR)/kernel.out $(KBIN)
 
 #.o文件规则
-$(OBJDIR)/%.o:$(SRCDIR)/%.c 
-	$(CC) $(CCLIST) $^ -o $@
+$(OBJDIR)/%.o:$(SRCDIR)/%.c
+	$(CC) $< -o $@ $(CCLIST) 
 
 $(OBJDIR)/%.o:$(SRCDIR)/%.S
-	$(CC) $(CCLIST) $^ -o $@
+	$(CC) $< -o $@ $(CCLIST)
 
 $(KINTOFS):$(KINTFS)
 	$(CC) $(CC_INT_LIST) $(KINTFS) -o $(KINTOFS)
@@ -135,5 +140,5 @@ dbg:
 dump:
 	-objdump -D -m i386 -b binary $(IMG) > kernel.txt
 
-dpelf:
+dpk:$(KBIN)
 	-objdump -D -m i386 $(KBIN) > kernel.txt

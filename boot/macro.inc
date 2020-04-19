@@ -48,17 +48,25 @@ HEAD_SIZE EQU 63		;head占用扇区数
 ;页
 PAGE_ADDR EQU 0x100000		;页目录的地址
 PAGE_SIZE EQU (0x400000+0x1000)	;页目录+页表长度
+PGSIZE EQU 4096			;页大小，字节
 ;内核
 KERNEL_SECTOR equ 32		;内核在硬盘中扇区位置
 KERNEL_SIZE equ 256		;内核长度，单位扇区
-KERNEL_ADDR equ 0x600000	;内核被加载的物理地址
+KERNEL_PADDR equ 0x600000	;内核被加载的物理地址
+KERNEL_VADDR equ 0xc0600000	;内核被加载的虚拟地址
+
+KERNEL_STACK_SIZE equ (32*4096)		;内核堆栈大小
+KERNEL_STACK_PADDR equ (KERNEL_PADDR+KERNEL_SECTOR*512)	;内核堆栈块内存的起始物理地址
+KERNEL_STACK_VADDR EQU (KERNEL_VADDR+KERNEL_SECTOR*512)	;内核堆栈的起始虚拟地址
+KERNEL_STACK_VBOTADDR equ (KERNEL_STACK_VADDR+KERNEL_STACK_SIZE)	;内核堆栈底栈虚拟地址
+KERNEL_STACK_PBOTADDR equ (KERNEL_STACK_PADDR+KERNEL_STACK_SIZE)	;内核堆栈底栈物理地址
+
 
 ;load_kernel程序被加载地址
 LK_ADDR equ 0x0000bce0 	;要被加载的位置，0x7c00+512*32
 LK_SEC equ 32		;load_kernel硬盘位置，单位：扇区
 LK_SIZE equ 32		;load_kernel程序长度，单位：扇区
 
-V_INIT_ADDR equ 0xc0600000	;kernel虚拟地址
 OS_CODE equ 0x8			;保护模式代码段
 OS_DATA equ 0x10		;保护模式数据段
 
