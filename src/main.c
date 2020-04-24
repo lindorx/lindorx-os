@@ -19,12 +19,12 @@
 #define LDTS 
 int _system()
 {
+        asm_cli();
         initsys_info();//初始化系统需要的信息
         //内存大小
         sys_printk("Memory size = %d Mb\n",_MEMORY_SIZE>>8);
         //asm_cpu_hlt();
         //init_mp();//初始化多处理器
-
         sys_printk("init GDT\n");
         init_gdt();//重置gdt表
         sys_printk("init memory.\n");
@@ -35,17 +35,11 @@ int _system()
         //open_intn(0x20);//打开计时器中断
         init_task();//初始化任务
         sys_printk("entry initpro().\n");
-        asm_sti();
-        //for(;;)
-        //asm_cpu_hlt();
+        //asm_sti();
         //切入0号进程
-        //restart();
-        //asm_cpu_hlt();
-        int i=0;
-         sys_printk("%d ",i++);
+        restart();
         for(;;){
-                //asm_cpu_hlt();
-                sys_printk("%d ",i++);
+                asm_cpu_hlt();
         }
         return 0;
 }

@@ -172,9 +172,9 @@ PG_USU equ 4		;U/S属性，用户级
 	out 0xa1,al
 	sti
 ;测试中断
-	int 0x80
-	cli 
-	hlt
+;	int 0x80
+;	cli
+;	hlt
 ;=============================================================
 ;从cmos读取当前时间，储存到指定位置
 	mov ebx,START_CMOS_TIME		;设定存入位置

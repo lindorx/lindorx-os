@@ -139,71 +139,72 @@ Disassembly of section .data:
      31c:	b0 ff                	mov    $0xff,%al
      31e:	e6 a1                	out    %al,$0xa1
      320:	fb                   	sti    
-     321:	cd 80                	int    $0x80
-     323:	fa                   	cli    
-     324:	f4                   	hlt    
-     325:	bb 14 bc 00 00       	mov    $0xbc14,%ebx
-     32a:	89 df                	mov    %ebx,%edi
-     32c:	ba 01 00 00 00       	mov    $0x1,%edx
-     331:	b9 03 00 00 00       	mov    $0x3,%ecx
-     336:	b0 00                	mov    $0x0,%al
-     338:	b4 00                	mov    $0x0,%ah
-     33a:	e6 70                	out    %al,$0x70
-     33c:	e4 71                	in     $0x71,%al
-     33e:	26 88 03             	mov    %al,%es:(%ebx)
-     341:	43                   	inc    %ebx
-     342:	80 c4 02             	add    $0x2,%ah
-     345:	88 e0                	mov    %ah,%al
-     347:	e2 f1                	loop   0x33a
-     349:	b9 03 00 00 00       	mov    $0x3,%ecx
-     34e:	b8 07 00 00 00       	mov    $0x7,%eax
-     353:	88 c4                	mov    %al,%ah
-     355:	e6 70                	out    %al,$0x70
-     357:	e4 71                	in     $0x71,%al
-     359:	26 88 03             	mov    %al,%es:(%ebx)
-     35c:	43                   	inc    %ebx
-     35d:	fe c4                	inc    %ah
-     35f:	88 e0                	mov    %ah,%al
-     361:	e2 f2                	loop   0x355
-     363:	b9 21 00 00 00       	mov    $0x21,%ecx
-     368:	bb 00 28 40 00       	mov    $0x402800,%ebx
-     36d:	b8 03 00 60 00       	mov    $0x600003,%eax
-     372:	89 03                	mov    %eax,(%ebx)
-     374:	83 c3 04             	add    $0x4,%ebx
-     377:	05 00 10 00 00       	add    $0x1000,%eax
-     37c:	e2 f4                	loop   0x372
-     37e:	e8 5d 1d 00 00       	call   0x20e0
-     383:	83 f8 00             	cmp    $0x0,%eax
-     386:	74 27                	je     0x3af
-     388:	89 c2                	mov    %eax,%edx
-     38a:	b9 20 00 00 00       	mov    $0x20,%ecx
-     38f:	bb 10 28 40 00       	mov    $0x402810,%ebx
-     394:	b8 03 40 60 00       	mov    $0x604003,%eax
-     399:	89 03                	mov    %eax,(%ebx)
-     39b:	83 c3 04             	add    $0x4,%ebx
-     39e:	05 00 10 00 00       	add    $0x1000,%eax
-     3a3:	e2 f4                	loop   0x399
-     3a5:	bc 00 40 62 c0       	mov    $0xc0624000,%esp
-     3aa:	ff d2                	call   *%edx
-     3ac:	f4                   	hlt    
-     3ad:	eb fd                	jmp    0x3ac
-     3af:	66 b8 10 00          	mov    $0x10,%ax
-     3b3:	bb c6 7f 00 00       	mov    $0x7fc6,%ebx
-     3b8:	b9 12 00 00 00       	mov    $0x12,%ecx
-     3bd:	b2 02                	mov    $0x2,%dl
-     3bf:	e8 ff 00 00 00       	call   0x4c3
-     3c4:	eb e6                	jmp    0x3ac
-     3c6:	4e                   	dec    %esi
+     321:	bb 14 bc 00 00       	mov    $0xbc14,%ebx
+     326:	89 df                	mov    %ebx,%edi
+     328:	ba 01 00 00 00       	mov    $0x1,%edx
+     32d:	b9 03 00 00 00       	mov    $0x3,%ecx
+     332:	b0 00                	mov    $0x0,%al
+     334:	b4 00                	mov    $0x0,%ah
+     336:	e6 70                	out    %al,$0x70
+     338:	e4 71                	in     $0x71,%al
+     33a:	26 88 03             	mov    %al,%es:(%ebx)
+     33d:	43                   	inc    %ebx
+     33e:	80 c4 02             	add    $0x2,%ah
+     341:	88 e0                	mov    %ah,%al
+     343:	e2 f1                	loop   0x336
+     345:	b9 03 00 00 00       	mov    $0x3,%ecx
+     34a:	b8 07 00 00 00       	mov    $0x7,%eax
+     34f:	88 c4                	mov    %al,%ah
+     351:	e6 70                	out    %al,$0x70
+     353:	e4 71                	in     $0x71,%al
+     355:	26 88 03             	mov    %al,%es:(%ebx)
+     358:	43                   	inc    %ebx
+     359:	fe c4                	inc    %ah
+     35b:	88 e0                	mov    %ah,%al
+     35d:	e2 f2                	loop   0x351
+     35f:	b9 21 00 00 00       	mov    $0x21,%ecx
+     364:	bb 00 28 40 00       	mov    $0x402800,%ebx
+     369:	b8 03 00 60 00       	mov    $0x600003,%eax
+     36e:	89 03                	mov    %eax,(%ebx)
+     370:	83 c3 04             	add    $0x4,%ebx
+     373:	05 00 10 00 00       	add    $0x1000,%eax
+     378:	e2 f4                	loop   0x36e
+     37a:	e8 61 1d 00 00       	call   0x20e0
+     37f:	83 f8 00             	cmp    $0x0,%eax
+     382:	74 27                	je     0x3ab
+     384:	89 c2                	mov    %eax,%edx
+     386:	b9 20 00 00 00       	mov    $0x20,%ecx
+     38b:	bb 10 28 40 00       	mov    $0x402810,%ebx
+     390:	b8 03 40 60 00       	mov    $0x604003,%eax
+     395:	89 03                	mov    %eax,(%ebx)
+     397:	83 c3 04             	add    $0x4,%ebx
+     39a:	05 00 10 00 00       	add    $0x1000,%eax
+     39f:	e2 f4                	loop   0x395
+     3a1:	bc 00 40 62 c0       	mov    $0xc0624000,%esp
+     3a6:	ff d2                	call   *%edx
+     3a8:	f4                   	hlt    
+     3a9:	eb fd                	jmp    0x3a8
+     3ab:	66 b8 10 00          	mov    $0x10,%ax
+     3af:	bb c2 7f 00 00       	mov    $0x7fc2,%ebx
+     3b4:	b9 12 00 00 00       	mov    $0x12,%ecx
+     3b9:	b2 02                	mov    $0x2,%dl
+     3bb:	e8 03 01 00 00       	call   0x4c3
+     3c0:	eb e6                	jmp    0x3a8
+     3c2:	4e                   	dec    %esi
+     3c3:	6f                   	outsl  %ds:(%esi),(%dx)
+     3c4:	74 20                	je     0x3e6
+     3c6:	6c                   	insb   (%dx),%es:(%edi)
      3c7:	6f                   	outsl  %ds:(%esi),(%dx)
-     3c8:	74 20                	je     0x3ea
-     3ca:	6c                   	insb   (%dx),%es:(%edi)
-     3cb:	6f                   	outsl  %ds:(%esi),(%dx)
-     3cc:	61                   	popa   
-     3cd:	64 20 6b 65          	and    %ch,%fs:0x65(%ebx)
-     3d1:	72 6e                	jb     0x441
-     3d3:	65 6c                	gs insb (%dx),%es:(%edi)
-     3d5:	21 0d 0a 60 1e 66    	and    %ecx,0x661e600a
-     3db:	b9 10 00 8e c1       	mov    $0xc18e0010,%ecx
+     3c8:	61                   	popa   
+     3c9:	64 20 6b 65          	and    %ch,%fs:0x65(%ebx)
+     3cd:	72 6e                	jb     0x43d
+     3cf:	65 6c                	gs insb (%dx),%es:(%edi)
+     3d1:	21 0d 0a 90 90 90    	and    %ecx,0x9090900a
+     3d7:	90                   	nop
+     3d8:	60                   	pusha  
+     3d9:	1e                   	push   %ds
+     3da:	66 b9 10 00          	mov    $0x10,%cx
+     3de:	8e c1                	mov    %ecx,%es
      3e0:	8e d9                	mov    %ecx,%ds
      3e2:	e8 ef 00 00 00       	call   0x4d6
      3e7:	6b d9 02             	imul   $0x2,%ecx,%ebx
@@ -1289,8 +1290,22 @@ Disassembly of section .data:
      fd2:	08 00                	or     %al,(%eax)
      fd4:	00 8f 00 00 00 00    	add    %cl,0x0(%edi)
 	...
+    110e:	00 00                	add    %al,(%eax)
+    1110:	29 8a 08 00 00 8f    	sub    %ecx,-0x70fffff8(%edx)
     1116:	00 00                	add    %al,(%eax)
     1118:	29 8a 08 00 00 8f    	sub    %ecx,-0x70fffff8(%edx)
+    111e:	00 00                	add    %al,(%eax)
+    1120:	29 8a 08 00 00 8f    	sub    %ecx,-0x70fffff8(%edx)
+    1126:	00 00                	add    %al,(%eax)
+    1128:	29 8a 08 00 00 8f    	sub    %ecx,-0x70fffff8(%edx)
+    112e:	00 00                	add    %al,(%eax)
+    1130:	29 8a 08 00 00 8f    	sub    %ecx,-0x70fffff8(%edx)
+    1136:	00 00                	add    %al,(%eax)
+    1138:	29 8a 08 00 00 8f    	sub    %ecx,-0x70fffff8(%edx)
+    113e:	00 00                	add    %al,(%eax)
+    1140:	29 8a 08 00 00 8f    	sub    %ecx,-0x70fffff8(%edx)
+    1146:	00 00                	add    %al,(%eax)
+    1148:	29 8a 08 00 00 8f    	sub    %ecx,-0x70fffff8(%edx)
 	...
     1ffe:	00 00                	add    %al,(%eax)
     2000:	ba f7 01 00 00       	mov    $0x1f7,%edx

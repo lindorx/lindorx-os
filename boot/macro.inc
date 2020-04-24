@@ -249,7 +249,5 @@ INT46_SEG EQU 0x08
 INT47 EQU seccondary_ide_int
 INT47_SEG EQU 0x08
 
-
-
 INT128 EQU _syscall
 INT128_SEG EQU 0x08
