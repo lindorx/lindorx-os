@@ -33,11 +33,10 @@
 #define DISK_SWAP_SIZE 0x10000	//交换分区大小
 
 //cpuid位置,占用16=0x10字节
-#define CPUID_TXT IDT_ADDR+IDT_SIZE
+#define CPUID_TXT SYSTEM_INFO
 //CMOS时间，占用8字节
 #define START_CMOS_TIME CPUID_TXT+20
-//系统信息存放位置,跟在IDT表后面
-#define SYSTEM_INFO CPUID_TXT
+
 //转存的bootloder，由于0x7c00可能被覆盖，head.asm会将0x7c00之后的512字节放在这里
 #define BOOT_INFO SYSTEM_INFO+512
 

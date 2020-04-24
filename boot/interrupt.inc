@@ -40,6 +40,8 @@ str0x2d db "int 0x2d"
 str0x2e db "int 0x2e"
 str0x2f db "int 0x2f"
 
+str0x80 db "head.asm syscall interrupt test.\n"
+
 ;中断发生时打印信息字体的颜色
 _FONT_COLOR equ 0x02	;绿色
 macro int_print_str __str,str_size
@@ -303,6 +305,20 @@ seccondary_ide_int:	;从硬盘传输控制
 	pop eax
 	iret
 ;数据==========================================================================
+
+;int 0x80===================================================================================================
+_syscall:
+	pusha
+	mov ax,0x10
+	mov ebx,str0x80
+	mov ecx,32
+	mov dl,0x02
+	call print_string
+	mov al,0x20
+	out 0x20,al
+	popa
+	call stop1
+	iret
 
 stop1:
 	hlt

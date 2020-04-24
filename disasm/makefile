@@ -1,0 +1,2 @@
+cle:
+	$(RM) *.txt *.asm

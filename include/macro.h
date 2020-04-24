@@ -18,13 +18,14 @@
 #define DPL_3 3
 //所有SIZE的单位均为 字节
 //系统参数区
-//#define SYS_PAR 0
-//#define SYS_PAR_SIZE 0X1000
+#define BOOTLODER_SIZE (32*512)
+//系统信息存放位置,跟在IDT表后面
+#define SYSTEM_INFO (0x7C00+BOOTLODER_SIZE)
 
 //文件系统说明，8字节
 #define FILE_SYSTEM 0xff8
 //年份基数
-#define START_TIME_YEAR 2019
+#define START_TIME_YEAR 2020
 
 //内核定义
 #define KERNEL_SIZE (32*512)	//内核长度，单位：字节
@@ -69,11 +70,6 @@ typedef long ptr_t;//指针类型，用来指向不确定类型的数据
 #else
 typedef int ptr_t;
 #endif
-
-//映射之后的地址
-#define _V_IDT_ADDR	0xc0000000	//IDT表虚拟地址
-#define _v_KERNEL_ADDR	0xc0600000	//kernel虚拟地址
-#define _V_SYSTEM_INFO	0xc0003000	//信息结构地址
 
 //链表处理程序
 //将a节点加入链表元素b的后面

@@ -21,10 +21,10 @@ void initpro()
         }
         else{
                 sys_printk("--initpro:fork successful.pid=%d\n",pid);
-                scheduler();
+                //scheduler();
                 //yield();
         }
-
+        asm_sti();
         for(;;){
                 asm_cpu_hlt();
         }

@@ -2,6 +2,7 @@
 #include<idt.h>
 #include<task.h>
 #include<syscall.h>
+#include<_asm.h>
 
 idt_t *idt=(idt_t*)P2V(IDT_ADDR);
 
@@ -163,8 +164,10 @@ void streaming_simd_ext(struct interrupt_frame* frame,uword_t error_code)//int 1
 __attribute__ ((interrupt))
 void timer_int(struct interrupt_frame* frame)
 {
-        //_INT_TEST(32);
-        scheduler();
+
+        _INT_TEST(32);
+        //scheduler();
+
 }
 //键盘中断 int 0x21
 __attribute__ ((interrupt))
@@ -386,8 +389,6 @@ void * int_fun[INTRE_NUM]={
         syscall                 //128   0x80
 };
 
-
-
 /*初始化idt表*/
 void init_int()
 {
@@ -398,7 +399,7 @@ void init_int()
         }
         //中断
         for(;i<0x80;++i){
-                set_idt(i,int_fun[i],OS_CODE_SEG,INTERRUPT_INT_TYPE,DPL_0,INTERRUPT_INEFF);
+                set_idt(i,int_fun[i],OS_CODE_SEG,INTERRUPT_INT_TYPE,DPL_0,INTERRUPT_EFF);
         }
         //注册系统调用
         set_idt(0x80,int_fun[0x80],OS_CODE_SEG,INTERRUPT_TRAP_TYPE,DPL_0,INTERRUPT_EFF);

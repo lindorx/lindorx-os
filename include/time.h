@@ -27,22 +27,24 @@ typedef struct  {
 #pragma pack()
 
 #define TIME_ZONE_OFFSET (-8)      //东八区时区差 8个小时
+#define TIME_NUM2HOURS(h) ((h)%24)  //整数转换小时
+
 //计算自1970年以来的秒数（linux代码）,时差已修正
 static inline unsigned long  mktime (unsigned int year, unsigned int mon,
     unsigned int day, unsigned int hour,
     unsigned int min, unsigned int sec)
 {
-    if (0 >= (int) (mon -= 2)){    /**//* 1..12 -> 11,12,1..10 */
-         mon += 12;      /**//* Puts Feb last since it has leap day */
+    if (0 >= (int) (mon -= 2)){    //1..12 -> 11,12,1..10
+         mon += 12;      // 由于有闰日，所以把2月放在最后
          year -= 1;
     }
  
     return (((
              (unsigned long ) (year/4 - year/100 + year/400 + 367*mon/12 + day) +
              year*365 - 719499
-          )*24 + hour+TIME_ZONE_OFFSET /**//* now have hours */
-       )*60 + min /**//* now have minutes */
-    )*60 + sec; /**//* finally seconds */
+          )*24 + hour+TIME_ZONE_OFFSET //小时
+       )*60 + min //分钟
+    )*60 + sec; //秒
 }
 
 //时间读取函数

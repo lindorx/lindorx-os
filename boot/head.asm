@@ -108,11 +108,11 @@ PG_USU equ 4		;U/S属性，用户级
 ;=============================================================
 ;将idt表复制到指定位置
 ;initinter:
-;	mov esi,idt_start
-;	mov edi,IDT_ADDR
-;	mov ecx,IDT_NUM*2
-;	rep movsd
-;	lidt ptr idt_size
+	mov esi,idt_start
+	mov edi,IDT_ADDR
+	mov ecx,IDT_NUM*2	;每一个idt表项大小为8字节，因此次数需要*2
+	rep movsd
+	lidt ptr idt_size
 
 ;映射硬件中断
 ;	禁止全部外部中断,分别向0x21和0xa1端口写入0xff
@@ -166,11 +166,15 @@ PG_USU equ 4		;U/S属性，用户级
 	out 0x40,al
 ;=============================================================
 ;开启中断,将0x21端口对应的位设置为0，在这里设置命令字ICW1
-	;mov al,0xfc
-	;out 0x21,al
-	;mov al,0xff
-	;out 0xa1,al
-	;sti
+	mov al,0xfc
+	out 0x21,al
+	mov al,0xff
+	out 0xa1,al
+	sti
+;测试中断
+	int 0x80
+	cli 
+	hlt
 ;=============================================================
 ;从cmos读取当前时间，储存到指定位置
 	mov ebx,START_CMOS_TIME		;设定存入位置
@@ -198,7 +202,6 @@ PG_USU equ 4		;U/S属性，用户级
 	inc ah
 	mov al,ah
 	loop @b
-
 ;=============================================================
 ;加载load_kernel程序，此程序位于物理地址0x7c00+32*512
 
@@ -208,7 +211,6 @@ PG_USU equ 4		;U/S属性，用户级
 
 mov ecx,KERNEL_SIZE/8+1	;页数
 mov ebx,0x101000+(KERNEL_VADDR shr 12)*4	;页表地址
-
 mov eax,KERNEL_PADDR or PG_P or PG_RWW or PG_USS	;被映射地址
 
 @@:
@@ -270,7 +272,6 @@ str_not_load_kernel db "Not load kernel!",13,10
 include 'fun32.inc'
 include 'interrupt.inc'
 
-
 align 2
 idt_size:
 dw IDT_NUM*8-1
@@ -329,37 +330,19 @@ IDTTbable INT44,INT44_SEG,0,1
 IDTTbable INT45,INT45_SEG,0,1
 IDTTbable INT46,INT46_SEG,0,1
 IDTTbable INT47,INT47_SEG,0,1
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	
+dd 0,0,0,0,0,0,0,0,0,0
+dd 0,0,0,0,0,0,0,0,0,0
+dd 0,0,0,0,0,0,0,0,0,0
+dd 0,0,0,0,0,0,0,0,0,0
+dd 0,0,0,0,0,0,0,0,0,0
+dd 0,0,0,0,0,0,0,0,0,0
+dd 0,0,0,0,0,0,0,0,0,0
+dd 0,0,0,0,0,0,0,0
+IDTTbable INT128,INT128_SEG,0,1
+IDTTbable INT128,INT128_SEG,0,1
+IDTTbable INT128,INT128_SEG,0,1
+IDTTbable INT128,INT128_SEG,0,1
+IDTTbable INT128,INT128_SEG,0,1
+IDTTbable INT128,INT128_SEG,0,1
+IDTTbable INT128,INT128_SEG,0,1
+IDTTbable INT128,INT128_SEG,0,1

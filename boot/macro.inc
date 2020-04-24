@@ -7,18 +7,30 @@
 
 ;GDT表
 ;GDT_ADDR EQU 0x501000		;GDT被加载的位置
-GDT_ADDR equ 0x7c00
-GDT_SIZE EQU 0x2000		;GDT长度，2^13=8192=0x2000
+;GDT_ADDR equ 0x7c00
 
+;head.asm
+HEAD_ADDR EQU 0x7E00		;head被加载的位置
+HEAD_SECN EQU 31		;head大小
+HEAD_SIZE EQU (HEAD_SECN*512)		;head占用扇区数
+
+;load_kernel程序被加载地址
+LK_ADDR equ 0x00009ce0 	;要被加载的位置，0x7c00+512*32
+LK_SECN equ 16		;load_kernel硬盘位置，单位：扇区
+LK_SIZE equ (LK_SEC*512)	;load_kernel程序长度，单位：扇区
+
+;GDT_SIZE EQU 0x2000		;GDT长度，2^13=8192=0x2000
+GDT_NUM equ 3		;gdt表项数量
 ;IDT表
-IDT_ADDR EQU GDT_ADDR+GDT_SIZE	;将idt表跟在gdt表后面
+IDT_ADDR EQU 0		;将idt表放在BIOS中断的位置
 IDT_SIZE EQU 0x1000		;idt最多有256个表项，每项8字节，占用0x800，为保证分页机制，因此将其设定为1页大小
-IDT_NUM EQU 48			;预定义idt表项数量
+IDT_NUM EQU 256			;预定义idt表项数量
 
 ;信息结构
-SYSTEM_INFO EQU IDT_ADDR+IDT_SIZE	;系统信息块
+SYSTEM_INFO EQU (HEAD_ADDR+HEAD_SIZE)	;系统信息块
 CPUID_TXT equ SYSTEM_INFO	;cpuid提取出的信息，占用16+4字节
-START_CMOS_TIME EQU CPUID_TXT+20	;开机时间位置，结构如下：
+CPUID_TXT_SIZE EQU 20
+START_CMOS_TIME EQU (SYSTEM_INFO+CPUID_TXT_SIZE)	;开机时间位置，结构如下：
 ;struct SYS_TIME{
 ;	byte s;		//秒
 ;	byte m;		//分
@@ -28,11 +40,10 @@ START_CMOS_TIME EQU CPUID_TXT+20	;开机时间位置，结构如下：
 ;	byte year;		//年
 ;}
 START_CMOS_TIME_size EQU 6	;开机时间结构占用6字节
-START_TIME_YEAR EQU 2019	;起始年份
+START_TIME_YEAR EQU 2020	;起始年份
 
 ;显示模式
 DISPLAY_MODE EQU START_CMOS_TIME+START_CMOS_TIME_size
-
 
 ;使用0x15 bios中断读出内存信息
 MEMORY_INFO EQU DISPLAY_MODE	;内存信息位置
@@ -41,9 +52,6 @@ MEMORY_INFO_SIZE EQU 20
 BOOT_INFO EQU SYSTEM_INFO+512	
 
 ;FILE_SYSTEM EQU 0x1a		;文件系统代号，占用8字节
-;head.asm
-HEAD_ADDR EQU 0x7E00		;head被加载的位置
-HEAD_SIZE EQU 63		;head占用扇区数
 
 ;页
 PAGE_ADDR EQU 0x100000		;页目录的地址
@@ -60,12 +68,6 @@ KERNEL_STACK_PADDR equ (KERNEL_PADDR+KERNEL_SECTOR*512)	;内核堆栈块内存�
 KERNEL_STACK_VADDR EQU (KERNEL_VADDR+KERNEL_SECTOR*512)	;内核堆栈的起始虚拟地址
 KERNEL_STACK_VBOTADDR equ (KERNEL_STACK_VADDR+KERNEL_STACK_SIZE)	;内核堆栈底栈虚拟地址
 KERNEL_STACK_PBOTADDR equ (KERNEL_STACK_PADDR+KERNEL_STACK_SIZE)	;内核堆栈底栈物理地址
-
-
-;load_kernel程序被加载地址
-LK_ADDR equ 0x0000bce0 	;要被加载的位置，0x7c00+512*32
-LK_SEC equ 32		;load_kernel硬盘位置，单位：扇区
-LK_SIZE equ 32		;load_kernel程序长度，单位：扇区
 
 OS_CODE equ 0x8			;保护模式代码段
 OS_DATA equ 0x10		;保护模式数据段
@@ -248,3 +250,6 @@ INT47 EQU seccondary_ide_int
 INT47_SEG EQU 0x08
 
 
+
+INT128 EQU _syscall
+INT128_SEG EQU 0x08

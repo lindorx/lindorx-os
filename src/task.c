@@ -70,7 +70,6 @@ int init_task()
         "ltr %%ax\n\t"
         ::"m"(tss_s));
 	sys_printk("install tss done.\n");
-	sys_printk("entry initpro().\n");
 	nowtask=task;
    return 0;     
 }

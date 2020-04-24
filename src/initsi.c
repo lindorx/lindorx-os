@@ -49,6 +49,7 @@ void initsys_info()
         
         //读取系统信息页，该页保存了开机时由boot.asm和head.asm写入的信息
         system_info *si=(system_info*)SYSTEM_INFO;
+        sys_printk("initsys_info:SYSTEM_INFO=0x%x\n",SYSTEM_INFO);
         //初始磁盘信息
         _DISK_UNIT=si->bootbk.Unit;
         _DISK_BYTEPERSEC=si->bootbk.BytePerSec;
@@ -81,11 +82,11 @@ void initsys_info()
         _TIME_BASE_CENTURY_YEAR=2000;
 
         //打印boot.asm设置的开机时间
-        sys_printk("Hello|boot time : %d/%d/%d %d:%d:%d\n",
+        sys_printk("Hello | boot time : %d/%d/%d %d:%d:%d\n",
         BCD_TO_NUMBER(si->uptime.year)+_TIME_BASE_CENTURY_YEAR,
         BCD_TO_NUMBER(si->uptime.month),
-        BCD_TO_NUMBER(si->uptime.day),
-        BCD_TO_NUMBER(si->uptime.h),
+        BCD_TO_NUMBER(si->uptime.day)+1,//天是从0开始算的，因此需要+1
+        TIME_NUM2HOURS(BCD_TO_NUMBER(si->uptime.h)+8),  //标准时间+8
         BCD_TO_NUMBER(si->uptime.m),
         BCD_TO_NUMBER(si->uptime.s));
 
@@ -95,8 +96,6 @@ void initsys_info()
         _KERNEL_INFO.pend=KERNEL_PADDR+KERNEL_SIZE;
         _KERNEL_INFO.vend=KERNEL_ADDR+KERNEL_SIZE;
         _KERNEL_INFO.size=KERNEL_SIZE;
-        
-        //载入内存管理器，文件管理器，中断管理器，等程序
 return;
 }
 

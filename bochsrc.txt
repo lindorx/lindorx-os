@@ -1,4 +1,4 @@
-megs:512
+megs:64
 
 #romimage:file=$BXSHARE/BIOS-bochs-latest
 romimage: file=BIOS-bochs-latest
@@ -18,7 +18,6 @@ log:bochsout.txt
 
 
 mouse:enabled=0
-
 
 #keyboard: keymap=$BXSHARE/keymaps/x11-pc-de.map
 keyboard: type=mf, serial_delay=250
