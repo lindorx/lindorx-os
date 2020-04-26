@@ -18,7 +18,7 @@ uint32 eflags;
 
 #define INTRE_NUM 256
 
-
+int syscall_table(uint n,uint eip,uint cs,uint eflags);
 
 //中断初始化
 void init_int();

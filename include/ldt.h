@@ -1,6 +1,6 @@
 #pragma once
 #include<type.h>
-struct ldt_t{
+/*struct ldt_t{
 	uint16	        limit0;
 	uint16	        base0;
 	byte		base1;
@@ -24,7 +24,7 @@ struct ldt_t{
                 byte t;
         }att1;
 	byte		base2;
-}__attribute__ ((aligned (1)));
+}__attribute__ ((aligned (1)));*/
 
 struct ldt_struct{
         uint16	        limit0;

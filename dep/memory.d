@@ -8,6 +8,7 @@ obj/memory.o: src/memory.c \
  C:\Users\代凡\Documents\代码\system\lindorx/include/errno.h \
  C:\Users\代凡\Documents\代码\system\lindorx/include/idt.h \
  C:\Users\代凡\Documents\代码\system\lindorx/include/gdt.h \
+ C:\Users\代凡\Documents\代码\system\lindorx/include/int.h \
  C:\Users\代凡\Documents\代码\system\lindorx/include/sysio.h \
  C:\Users\代凡\Documents\代码\system\lindorx/include/math.h \
  C:\Users\代凡\Documents\代码\system\lindorx/include/mem.h \
@@ -31,6 +32,8 @@ C:\Users\代凡\Documents\代码\system\lindorx/include/errno.h:
 C:\Users\代凡\Documents\代码\system\lindorx/include/idt.h:
 
 C:\Users\代凡\Documents\代码\system\lindorx/include/gdt.h:
+
+C:\Users\代凡\Documents\代码\system\lindorx/include/int.h:
 
 C:\Users\代凡\Documents\代码\system\lindorx/include/sysio.h:
 

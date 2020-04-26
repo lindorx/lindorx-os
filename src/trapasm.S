@@ -1,8 +1,8 @@
 #include <mmu.h>
 
-  # vectors.S sends all traps here.
+/*  # vectors.S sends all traps here.
 .globl alltraps
-/*alltraps:
+alltraps:
   # Build trap frame.
   pushl %ds
   pushl %es

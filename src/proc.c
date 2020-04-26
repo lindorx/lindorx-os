@@ -51,16 +51,18 @@ struct task_struct *myproc()
 //子进程返回0，父进程返回子进程pid，错误则返回-1
 
 pid_t sys_fork(void)
-{
+{       
         pid_t pid;
         struct task_struct *nt;
         struct task_struct *curt=mytask();
+        sys_printk("eip=0x%x\n",curt->proc.tf->eip);
         sys_printk("fork:now task=0x%x\n",curt);
         //申请新的任务空间
         if((nt=alloctask())==NULL){
+                sys_printk("(nt=alloctask())==NULL");
                 return -1;
         }
-        //复制原进程
+        //复制原进程trapframe
         nt->proc.sz=curt->proc.sz;
         nt->proc.parent=curt;
         memcpy(nt->proc.tf,curt->proc.tf,sizeof(struct trapframe));
@@ -79,8 +81,11 @@ pid_t sys_fork(void)
         page_set_rw(curt->proc.pgdir,USER_PSZ*sizeof(pte_t)/PGSIZE,_PAGE_RWR);
         //创建子进程的页表，由于子进程页表复制自父进程，因此子进程也会被设置为不可写状态
         nt->proc.pgdir=copyuvm(curt->proc.pgdir,curt->proc.sz);
-        if(nt->proc.pgdir==NULL)
+        if(nt->proc.pgdir==NULL){
+                sys_printk("nt->proc.pgdir==NULL\n");
                 return -1;
+        }
+             
         //获取任务锁
         acquire(&tasklist.lock);
         nt->proc.state=RUNNABLE;
@@ -111,12 +116,13 @@ forkret(void)
 
 void scheduler(void)
 {
+        sys_printk("scheduler:\n");
         struct task_struct *t=nowtask;
         //任务锁
         acquire(&tasklist.lock);
         //下一个任务
         nowtask=nowtask->next1;
-        //切换用户页表
+        //切换下一个进程的页表
         switchuvm(nowtask);
         //设置为运行态
         nowtask->proc.state=RUNNING;

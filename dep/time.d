@@ -10,6 +10,7 @@ obj/time.o: src/time.c \
  C:\Users\代凡\Documents\代码\system\lindorx/include/errno.h \
  C:\Users\代凡\Documents\代码\system\lindorx/include/idt.h \
  C:\Users\代凡\Documents\代码\system\lindorx/include/gdt.h \
+ C:\Users\代凡\Documents\代码\system\lindorx/include/int.h \
  C:\Users\代凡\Documents\代码\system\lindorx/include/string.h
 
 C:\Users\代凡\Documents\代码\system\lindorx/include/time.h:
@@ -33,5 +34,7 @@ C:\Users\代凡\Documents\代码\system\lindorx/include/errno.h:
 C:\Users\代凡\Documents\代码\system\lindorx/include/idt.h:
 
 C:\Users\代凡\Documents\代码\system\lindorx/include/gdt.h:
+
+C:\Users\代凡\Documents\代码\system\lindorx/include/int.h:
 
 C:\Users\代凡\Documents\代码\system\lindorx/include/string.h:

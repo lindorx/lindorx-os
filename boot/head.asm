@@ -31,7 +31,7 @@ use16
 	mov gs,ax
 	mov esp,KERNEL_STACK_PBOTADDR
 ;清空流水线，并串行化处理器
-	jmp dword 0x08:_start
+	jmp dword OS_CODE:_start
 use32
 _start:
 ;检查是否支持cpuid指令，检查eflags寄存器的ID标志位，如果可以修改，则说明支持cpuid指令。
@@ -159,8 +159,8 @@ PG_USU equ 4		;U/S属性，用户级
 ;初始化计时器，
 	mov al,0x34
 	out 0x43,al
-	;mov eax,0x1234dc/500	;设定100Hz
-	mov eax,0x2e9b
+	mov eax,0x1234dc/500	;设定100Hz
+	;mov eax,0x2e9b
 	out 0x40,al
 	mov al,ah
 	out 0x40,al
@@ -181,8 +181,7 @@ PG_USU equ 4		;U/S属性，用户级
 	mov edi,ebx
 	mov edx,1
 	mov ecx,3
-	mov al,0
-	mov ah,0
+	mov ax,0
 @@:
 	out 0x70,al
 	in al,0x71

@@ -3,8 +3,11 @@
 #include<task.h>
 #include<syscall.h>
 #include<_asm.h>
+#include<proc.h>
 
-idt_t *idt=(idt_t*)P2V(IDT_ADDR);
+//idt_t *idt=(idt_t*)P2V(IDT_ADDR);
+idt_t idt[IDT_NUM]={0};//idt表
+uint idt_size=0;
 
 pid_t fork_pid=0;
 //向控制台打印发生的中断号，并使cpu暂停
@@ -193,7 +196,7 @@ void com1_int(struct interrupt_frame* frame)
 {
         _INT_TEST(36);
 }
-//并行口2中断，声卡 int 0x15
+//并行口2中断，声卡 int 0x25
 __attribute__ ((interrupt))
 void lptr2_int(struct interrupt_frame* frame)
 {
@@ -261,6 +264,26 @@ void seccondary_ide_int(struct interrupt_frame* frame)
         _INT_TEST(47);
 }
 
+static void flushtf(struct trapframe *tf)
+{       
+        asm volatile("push %%ebp\n\t"
+        "mov %%esp,%%ebp\n\t"
+        "mov %0,%%esp\n\t"
+        "pusha\n\t"
+        "push %%gs\n\t"
+        "push %%fs\n\t"
+        "push %%es\n\t"
+        "push %%ds\n\t"
+        "add $24,%%esp\n\t"
+        "push %%ebp\n\t"
+        "push %%ss\n\t"
+        "mov %%ebp,%%esp\n\t"
+        "pop %%ebp\n\t"
+        ::"g"(tf):"memory");
+        //asm_cpu_hlt();
+}
+#pragma GCC push_options
+#pragma GCC optimize ("O0")
 //系统调用表
 int syscall_table(uint n,uint eip,uint cs,uint eflags)
 {
@@ -268,14 +291,15 @@ int syscall_table(uint n,uint eip,uint cs,uint eflags)
         struct task_struct *t=mytask();
         sys_printk("syscall_table:n=%d\n",n);
         sys_printk("syscall_fork:eip=0x%x,cs=0x%x,eflags=0x%x\n",eip,cs,eflags);
-        asm_cpu_hlt();
         switch(n){
                 case syscall_fork:{
-                         //更新当前进程的trapframe
+                //更新当前进程的trapframe
+                
+                //flushtf(t->proc.tf);
                 t->proc.tf->eip=eip;
                 t->proc.tf->cs=cs;
                 t->proc.tf->eflags=eflags;
-                
+                //调用sys_fork()之前需要保存当前寄存器的所有内容
                 return sys_fork();
                 }
                 break;
@@ -287,51 +311,11 @@ int syscall_table(uint n,uint eip,uint cs,uint eflags)
         }
 return -1;
 }
-/*这里为中断处理函数，所有发生的中断跳转到这里来进行处理*/
-//软件中断
-#pragma push_options
-#pragma GCC optimize ("O2")
-//__attribute__ ((interrupt))
-void syscall(struct interrupt_frame* frame)
-{       
-        asm volatile(
-                "push %3\n\t"
-                "push %2\n\t"
-                "push %1\n\t"
-                "push %%eax\n\t"
-                "call %0\n\t"
-                "add $16,%%esp\n\t"
-                "iret\n\t"
-                ::"m"(syscall_table),
-                "m"(frame->eip),
-                "m"(frame->cs),
-                "m"(frame->eflags) 
-                );
-       /* //sys_printk("int 0x80\n");
-        int eax,pid;
-        asm volatile("mov %%eax,%0":"=a"(eax));
-        struct task_struct *t=mytask();
-        //sys_printk("syscall:eax=0x%x\n",eax);
-        switch(eax){
-                case syscall_fork:{
-                         //更新当前进程的trapframe
-                t->proc.tf->eip=frame->eip;
-                t->proc.tf->cs=frame->cs;
-                t->proc.tf->eflags=frame->eflags;
-                fork_pid=sys_fork();
-                }
-                break;
-                case 0:{
-                        for(;;)
-                                asm_cpu_hlt();
-                }
-                default:
-                        return;
-        }
-        asm volatile("mov %0,%%eax"::"m"(fork_pid));*/
-}
-#pragma pop_options
+#pragma GCC pop_options
+//syscallasm.S
+extern void syscall(void);
 
+//中断函数表
 void * int_fun[INTRE_NUM]={
         div_error,              //0     0x0
         debug_error,            //1     0x1
@@ -389,6 +373,8 @@ void * int_fun[INTRE_NUM]={
         syscall                 //128   0x80
 };
 
+
+
 /*初始化idt表*/
 void init_int()
 {
@@ -403,7 +389,8 @@ void init_int()
         }
         //注册系统调用
         set_idt(0x80,int_fun[0x80],OS_CODE_SEG,INTERRUPT_TRAP_TYPE,DPL_0,INTERRUPT_EFF);
-        asm_lidt(INTRE_NUM*sizeof(idt_t)-1,(void*)P2V(IDT_ADDR));
+        idt_size=INTRE_NUM*sizeof(idt_t)-1;
+        asm_lidt(idt_size,idt);
 return;
 }
 

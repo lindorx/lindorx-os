@@ -10,6 +10,7 @@ void initpro()
 {
         sys_printk("init progma start\n");
         //载入文件管理程序
+        sys_printk("call fork()\n");
         int pid=fork();
         if(pid<0){
                 sys_printk("--initpro:failure to fork.\n");
@@ -21,10 +22,10 @@ void initpro()
         }
         else{
                 sys_printk("--initpro:fork successful.pid=%d\n",pid);
-                //scheduler();
+                scheduler();
                 //yield();
         }
-        asm_sti();
+        //asm_sti();
         for(;;){
                 asm_cpu_hlt();
         }

@@ -64,7 +64,7 @@ typedef Elf64_Half Elf64_Versym;
 #pragma pack(1)
 //elf文件头
 /*e_ident:
-0:0x70 (DEL)
+0:0x7f (DEL)
 1:0x45 ('E')
 2:0x4c ('L')
 3:0x46 ('F')

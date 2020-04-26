@@ -161,14 +161,22 @@ struct load_struct{
         unsigned short size;
         void *addr;
 };
-
 #pragma pack()
+
 static inline void asm_lgdt(unsigned short size, void *gdt)
 {
         struct load_struct l;
         l.size=size;
         l.addr=gdt;
     __asm__ __volatile__("lgdt %0"::"m"(l));
+}
+
+//获取gdtr寄存器内容
+static inline struct load_struct asm_sgdt()
+{
+    struct load_struct g;
+    __asm__ __volatile__("sgdt %0":"=m"(g)::"memory");
+    return g;
 }
 
 static inline void asm_lidt(unsigned short size,void *idt)

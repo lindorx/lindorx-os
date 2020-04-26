@@ -3,11 +3,9 @@
 typedef unsigned short seg_sel;//段选择子
 typedef unsigned short seg_s;//段选择子类型
 
-//GDT表地址,长度为2^13=8192=0x2000字节
-#define GDT_OLD_ADDR	0x7c00		//由bootloder加载的gdt地址
-#define GDT_OLD_NUM	3		//由bootloder加载的gdt长度
-#define GDT_ADDR 0x501000
-#define GDT_SIZE 0x2000
+//GDT表项数量，2^13=8192
+#define GDT_INIT_NUM 8192
+#define GDT_SIZE (GDT_INIT_NUM*8)
 //GDT属性
 #define GDT_TYPE_DATA 0x2
 #define GDT_TYPE_CODE 0xa
@@ -64,7 +62,7 @@ typedef struct GDTABLE gdt_t;
 #define _GDT_DB_DATA 	1	//如果type属性为数据段，使用此值
 #define _GDT_DB_CODE 	1	//如果type属性为代码段，使用此值
 
-extern gdt_t gdt[GDT_SIZE];            //GDT表
+extern gdt_t gdt[GDT_INIT_NUM];            //GDT表
 extern uint32 gdt_num;       //当前GDT表项的数量
 
 //加载gdt

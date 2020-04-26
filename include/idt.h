@@ -1,10 +1,11 @@
 #pragma once
 #include<gdt.h>
+#include<int.h>
 
 //IDT表位置
-#define IDT_ADDR (GDT_ADDR+GDT_SIZE) 		//idt表基址
-#define IDT_SIZE 0x1000				//idt表长度 0x800
-
+//#define IDT_ADDR (GDT_ADDR+GDT_SIZE) 		//idt表基址
+#define IDT_NUM (256)
+#define IDT_SIZE (IDT_NUM*8)				//idt表长度 0x800
 //中断类型
 #define INTERRUPT_TASK_TYPE 0x5 //任务门,不使用
 #define INTERRUPT_INT_TYPE 0xe	//中断门，会修改IF位，屏蔽中断,0xe
@@ -26,17 +27,18 @@ typedef struct _IDTTABLE{
 }_IDTTABLE;
 typedef _IDTTABLE idt_t;
 #pragma pack(pop)
-
+extern idt_t idt[];//idt表
+extern uint idt_size;
 
 //在由IDT_ADDR指定的位置设置中断描述表项。
 static inline void set_idt(uint32 i,void (*off)(),uint16 selector,char type,char dpl,char p)
 {
-        ((_IDTTABLE *)IDT_ADDR)[i].offset_low=(uint16)(0xffff&(uint32)off);
-        (( _IDTTABLE *)IDT_ADDR)[i].offset_high=(uint16)((uint32)off>>16);
-	(( _IDTTABLE *)IDT_ADDR)[i].selector=selector;
-        (( _IDTTABLE *)IDT_ADDR)[i].reserved=0;
-        (( _IDTTABLE *)IDT_ADDR)[i].type=type;
-        ((_IDTTABLE *)IDT_ADDR)[i].always0=0;
-        (( _IDTTABLE *)IDT_ADDR)[i].dpl=dpl;
-        (( _IDTTABLE *)IDT_ADDR)[i].present=p;
+        idt[i].offset_low=(uint16)(0xffff&(uint32)off);
+        idt[i].offset_high=(uint16)((uint32)off>>16);
+	idt[i].selector=selector;
+        idt[i].reserved=0;
+        idt[i].type=type;
+        idt[i].always0=0;
+        idt[i].dpl=dpl;
+        idt[i].present=p;
 }

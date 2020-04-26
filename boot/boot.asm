@@ -35,31 +35,13 @@ _start:
 	mov [edi+4],ecx	;保存总字符行数
 	movzx ecx,bh 
 	mov [edi+8],ecx	;保存显示页
-;设定GDT表
-	;mov si,gdt_start
-	;mov di,GDT_ADDR		;将gdt复制到GDT_ADDR处
-	;mov cx,GDT_NUM*8/4
-	rep movsd		;将GDT复制到GDT_TABLE位置
+	
 	;准备进入保护模式
 	lgdt ptr gdt_size
 	;打开A20地址线
 	in al,0x92
 	or al,0000_0010b
 	out 0x92,al
-
-;设置PE位，进入保护模式
-;	mov eax,cr0
-;	or eax,1
-;	mov cr0,eax
-;修改段寄存器
-;	mov ax,OS_DATA
-;	mov ds,ax
-;	mov ss,ax
-;	mov es,ax
-;	mov gs,ax
-;	mov fs,ax
-;	mov esp,0x600000
-
 
 	jmp __head
 ;spin:

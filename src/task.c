@@ -43,6 +43,11 @@ int init_task()
 	memcpy(&(task->ldt[_TASK_LDT_DS]),&gdt[OS_DATA_SEG>>3],sizeof(ldt_t));
 	task->ldt[_TASK_LDT_DS].DPL=_FIRST_TASK_DPL;
 	task->ldtsz=TASK_LDT_SZIE;
+	//sys_printk("gdt=0x%x\n",gdt[1].base0+(gdt[1].base1<<16));
+	sys_printk("gdt addr=0x%x\n",gdt);
+	sys_printk("ldt addr=0x%x\n",task->ldt);
+
+	//sys_printk("ldt=0x%x\n",task->ldt[0].base0+(task->ldt[0].base1<<16));
 	//初始化进程
 	task->proc.sz=1;
 	task->proc.pgdir=PAGE_DIR_VA;
@@ -149,13 +154,15 @@ struct task_struct *alloctask()
 	//获取一块内存储存进程结构
 	t=(struct task_struct*)__kmalloc(sizeof(struct task_struct));
 	sys_printk("alloctask():t=0x%x\n",t);
+
 	if(t==NULL)return NULL;
 	memset(t,0,sizeof(struct task_struct));
 	t->proc.state=EMBRYO;
 	t->proc.pid=nextpid++;
 	char *sp;
-	t->proc.kstack=__get_free_pages(___GFP_PMEM,_PROC_STACK_PAGES_ORDER);
-	sys_printk("alloctask:t->proc.kstack=%x\n",t->proc.kstack);
+	t->proc.kstack=__get_free_pages(___GFP_KMEM,_PROC_STACK_PAGES_ORDER);
+	sys_printk("alloctask:t->proc.kstack=0x%x\n",t->proc.kstack);
+
 	if(t->proc.kstack==NULL){
 		__kfree(t);
 		return (struct task_struct*)NULL;

@@ -1,7 +1,8 @@
 #include<gdt.h>
 #include<_asm.h>
 #include<string.h>
-gdt_t gdt[GDT_SIZE];            //GDT表
+#include<sysio.h>
+gdt_t gdt[GDT_INIT_NUM];            //GDT表
 uint32 gdt_num=0;       //当前GDT表项的数量
 
 #pragma pack(1)
@@ -53,8 +54,11 @@ uint16 step_up_gdt(uint32 i,    //指定位置
 //将现在的gdt复制到新地址，并刷新gdtr寄存器
 void init_gdt()
 {
-        memcpy(gdt,GDT_OLD_ADDR,GDT_OLD_NUM*sizeof(gdt_t));
-        gdt_num=GDT_OLD_NUM;
-        asm_lgdt(GDT_OLD_NUM*sizeof(gdt_t)-1,gdt);
+        //获取当前gdt地址，并复制数据
+        struct load_struct g=asm_sgdt();
+        memcpy(gdt,g.addr,g.size+1);
+        gdt_num=(g.size+1)/sizeof(gdt_t);
+        asm_lgdt(g.size,gdt);
+        sys_printk("load gdt,addr=0x%x,size=0x%x\n",gdt,g.size);
 return;
 }

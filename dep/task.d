@@ -8,6 +8,8 @@ obj/task.o: src/task.c \
  C:\Users\代凡\Documents\代码\system\lindorx/include/errno.h \
  C:\Users\代凡\Documents\代码\system\lindorx/include/idt.h \
  C:\Users\代凡\Documents\代码\system\lindorx/include/gdt.h \
+ C:\Users\代凡\Documents\代码\system\lindorx/include/int.h \
+ C:\Users\代凡\Documents\代码\system\lindorx/include/sysio.h \
  C:\Users\代凡\Documents\代码\system\lindorx/include/task.h \
  C:\Users\代凡\Documents\代码\system\lindorx/include/ldt.h \
  C:\Users\代凡\Documents\代码\system\lindorx/include/proc.h \
@@ -15,7 +17,6 @@ obj/task.o: src/task.c \
  C:\Users\代凡\Documents\代码\system\lindorx/include/mmu.h \
  C:\Users\代凡\Documents\代码\system\lindorx/include/spinlock.h \
  C:\Users\代凡\Documents\代码\system\lindorx/include/cpu.h \
- C:\Users\代凡\Documents\代码\system\lindorx/include/sysio.h \
  C:\Users\代凡\Documents\代码\system\lindorx/include/program.h \
  C:\Users\代凡\Documents\代码\system\lindorx/include/string.h \
  C:\Users\代凡\Documents\代码\system\lindorx/include/panic.h \
@@ -39,6 +40,10 @@ C:\Users\代凡\Documents\代码\system\lindorx/include/idt.h:
 
 C:\Users\代凡\Documents\代码\system\lindorx/include/gdt.h:
 
+C:\Users\代凡\Documents\代码\system\lindorx/include/int.h:
+
+C:\Users\代凡\Documents\代码\system\lindorx/include/sysio.h:
+
 C:\Users\代凡\Documents\代码\system\lindorx/include/task.h:
 
 C:\Users\代凡\Documents\代码\system\lindorx/include/ldt.h:
@@ -52,8 +57,6 @@ C:\Users\代凡\Documents\代码\system\lindorx/include/mmu.h:
 C:\Users\代凡\Documents\代码\system\lindorx/include/spinlock.h:
 
 C:\Users\代凡\Documents\代码\system\lindorx/include/cpu.h:
-
-C:\Users\代凡\Documents\代码\system\lindorx/include/sysio.h:
 
 C:\Users\代凡\Documents\代码\system\lindorx/include/program.h:
 

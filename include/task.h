@@ -16,6 +16,7 @@ struct TSS32
 extern struct TSS32 tss;//tss段
 
 //进程链
+#define TASK_LDT_SZIE 2
 struct task_struct{
   struct task_struct *next1;//一级链，保存可执行进程
   struct task_struct *prev1;

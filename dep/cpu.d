@@ -11,6 +11,7 @@ obj/cpu.o: src/cpu.c \
  C:\Users\代凡\Documents\代码\system\lindorx/include/errno.h \
  C:\Users\代凡\Documents\代码\system\lindorx/include/idt.h \
  C:\Users\代凡\Documents\代码\system\lindorx/include/gdt.h \
+ C:\Users\代凡\Documents\代码\system\lindorx/include/int.h \
  C:\Users\代凡\Documents\代码\system\lindorx/include/page.h \
  C:\Users\代凡\Documents\代码\system\lindorx/include/mmu.h \
  C:\Users\代凡\Documents\代码\system\lindorx/include/ldt.h \
@@ -40,6 +41,8 @@ C:\Users\代凡\Documents\代码\system\lindorx/include/errno.h:
 C:\Users\代凡\Documents\代码\system\lindorx/include/idt.h:
 
 C:\Users\代凡\Documents\代码\system\lindorx/include/gdt.h:
+
+C:\Users\代凡\Documents\代码\system\lindorx/include/int.h:
 
 C:\Users\代凡\Documents\代码\system\lindorx/include/page.h:
 

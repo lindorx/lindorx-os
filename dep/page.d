@@ -10,6 +10,7 @@ obj/page.o: src/page.c \
  C:\Users\代凡\Documents\代码\system\lindorx/include/_asm.h \
  C:\Users\代凡\Documents\代码\system\lindorx/include/gfp.h \
  C:\Users\代凡\Documents\代码\system\lindorx/include/idt.h \
+ C:\Users\代凡\Documents\代码\system\lindorx/include/int.h \
  C:\Users\代凡\Documents\代码\system\lindorx/include/sysio.h \
  C:\Users\代凡\Documents\代码\system\lindorx/include/string.h \
  C:\Users\代凡\Documents\代码\system\lindorx/include/panic.h
@@ -35,6 +36,8 @@ C:\Users\代凡\Documents\代码\system\lindorx/include/_asm.h:
 C:\Users\代凡\Documents\代码\system\lindorx/include/gfp.h:
 
 C:\Users\代凡\Documents\代码\system\lindorx/include/idt.h:
+
+C:\Users\代凡\Documents\代码\system\lindorx/include/int.h:
 
 C:\Users\代凡\Documents\代码\system\lindorx/include/sysio.h:
 

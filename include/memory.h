@@ -53,7 +53,6 @@
 #define KEYIN_BUF 0x600000+KERNEL_SIZE
 
 
-
 char initMemory();
 
 //初始化分页

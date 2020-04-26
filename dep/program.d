@@ -12,6 +12,7 @@ obj/program.o: src/program.c \
  C:\Users\代凡\Documents\代码\system\lindorx/include/gfp.h \
  C:\Users\代凡\Documents\代码\system\lindorx/include/errno.h \
  C:\Users\代凡\Documents\代码\system\lindorx/include/idt.h \
+ C:\Users\代凡\Documents\代码\system\lindorx/include/int.h \
  C:\Users\代凡\Documents\代码\system\lindorx/include/page.h \
  C:\Users\代凡\Documents\代码\system\lindorx/include/mmu.h \
  C:\Users\代凡\Documents\代码\system\lindorx/include/spinlock.h
@@ -41,6 +42,8 @@ C:\Users\代凡\Documents\代码\system\lindorx/include/gfp.h:
 C:\Users\代凡\Documents\代码\system\lindorx/include/errno.h:
 
 C:\Users\代凡\Documents\代码\system\lindorx/include/idt.h:
+
+C:\Users\代凡\Documents\代码\system\lindorx/include/int.h:
 
 C:\Users\代凡\Documents\代码\system\lindorx/include/page.h:
 

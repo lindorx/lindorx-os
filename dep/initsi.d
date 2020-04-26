@@ -11,6 +11,7 @@ obj/initsi.o: src/initsi.c \
  C:\Users\代凡\Documents\代码\system\lindorx/include/errno.h \
  C:\Users\代凡\Documents\代码\system\lindorx/include/idt.h \
  C:\Users\代凡\Documents\代码\system\lindorx/include/gdt.h \
+ C:\Users\代凡\Documents\代码\system\lindorx/include/int.h \
  C:\Users\代凡\Documents\代码\system\lindorx/include/string.h \
  C:\Users\代凡\Documents\代码\system\lindorx/include/elf32.h \
  C:\Users\代凡\Documents\代码\system\lindorx/include/elf-em.h \
@@ -40,6 +41,8 @@ C:\Users\代凡\Documents\代码\system\lindorx/include/errno.h:
 C:\Users\代凡\Documents\代码\system\lindorx/include/idt.h:
 
 C:\Users\代凡\Documents\代码\system\lindorx/include/gdt.h:
+
+C:\Users\代凡\Documents\代码\system\lindorx/include/int.h:
 
 C:\Users\代凡\Documents\代码\system\lindorx/include/string.h:
 
