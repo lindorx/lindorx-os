@@ -2,12 +2,14 @@
 //包含磁盘io，显示设备io等
 #include<sysio.h>
 #include<initsi.h>
-#include<vadefs.h>
+#include<_asm.h>
+
 #include<string.h>
 
 #define __DISPLAY_ADDR 0XB8000
 #define __DISPLAY_WIDTH 80
 #define __DISPLAY_HEIGHT 25
+#define __DISPLAY_BUF_SIZE (__DISPLAY_WIDTH*__DISPLAY_HEIGHT*2)
 
 //读取当前显示屏的光标，适用于80*25的显示样式
 uint32 get_cursor()
@@ -54,44 +56,49 @@ void put_cursor(uint32 pos)
         );
 }
 
-//格式化输出函数，直接向终端打印字符串
-int sys_printk(const char* str,...)
+int sys_printv(const char*str,va_list va)
 {
         //获取光标位置
         int pos=get_cursor();
-        //struct TEXT_DISPLPY_CHAR* dp=_DISPLAY_TEXT_ADDR;//字符输出位置
-        struct TEXT_DISPLPY_CHAR* dp=__DISPLAY_ADDR;
-        int i=0,num;
-        va_list va;
-        va_start(va,str);
+        struct TEXT_DISPLPY_CHAR* dp=(__DISPLAY_ADDR);
+        int i=0,num,pi=0;
         while(str[i]>7){//在退格之前的字符不做处理
-                if(str[i]=='%'){i++;
+                if(pos>=__DISPLAY_HEIGHT*__DISPLAY_WIDTH){//如果缓冲区指针超过缓冲区，上移一行
+                        pi+=__DISPLAY_WIDTH;
+                        pos-=__DISPLAY_WIDTH;
+                        memcpy(dp,dp+__DISPLAY_WIDTH,__DISPLAY_WIDTH*(__DISPLAY_HEIGHT-1)*sizeof(struct TEXT_DISPLPY_CHAR));
+                        //清空最后一行
+                        memset(dp+__DISPLAY_WIDTH*(__DISPLAY_HEIGHT-1),0,__DISPLAY_WIDTH*sizeof(struct TEXT_DISPLPY_CHAR));
+                }
+                if(str[i]=='%'){
+                        i++;
                         switch(str[i]){
-                                case '%':{
+                                case '%':{//百分号
                                         dp[pos].ch='%';
                                         dp[pos].color=TEXT_COLOR;
                                         pos++;
                                 }break;
-                                case 'd':{
+                                case 'd':{//整数
                                         char s[20];
                                         num=itoas(va_arg(va,int),s,10);
                                         pos+=sys_printstr(s,num,pos,dp);
                                 }break;
-                                case 'x':{
+                                case 'x':{//16进制
                                         char s[20];
                                         num=uitoas(va_arg(va,unsigned int),s,16);
                                         pos+=sys_printstr(s,num,pos,dp);
                                 }break;
-                                case 'c':{
+                                case 'c':{//字符
                                         dp[pos].ch=va_arg(va,char);
                                         dp[pos].color=TEXT_COLOR;
                                         pos++;
                                 }break;
-                                case 's':{
+                                case 's':{//字符串
                                         char *s=va_arg(va,char*);
-                                        pos+=sys_printstr(s,strlen(s),pos,dp);
+                                        //pos+=sys_printstr(s,strlen(s),pos,dp);
+                                        pos+=sys_printk(s);
                                 }break;
-                                case 'l':{
+                                case 'l':{//长整型
                                         char s[20];
                                         num=itoas(va_arg(va,long),s,10);
                                         pos+=sys_printstr(s,num,pos,dp);
@@ -99,7 +106,7 @@ int sys_printk(const char* str,...)
                         }
                         i++;
                 }
-                else if(str[i]>=0x20){
+                else if(str[i]>=0x20){//输出字符
                         dp[pos].ch=str[i];
                         dp[pos].color=TEXT_COLOR;
                         pos++;
@@ -108,11 +115,20 @@ int sys_printk(const char* str,...)
                 else{//控制字符处理
                         pos=put_ctlch(str[i++],dp,pos,__DISPLAY_WIDTH,__DISPLAY_HEIGHT);
                 }
-                
         }
-        va_end(va);
         put_cursor(pos);
-        return i;
+        return i-pi;
+}
+
+//格式化输出函数，直接向终端打印字符串
+int sys_printk(const char* str,...)
+{
+        int num;
+        va_list va;
+        va_start(va,str);
+        num = sys_printv(str,va);
+        va_end(va);
+        return num;
 }
 //向控制台打印一个字符
 int sys_putchar(char ch)
@@ -123,7 +139,7 @@ int sys_putchar(char ch)
         dp[pos].color=TEXT_COLOR;
         dp[pos].ch=ch;
         put_cursor(++pos);
-        return 0;
+        return (int)ch;
 }
 
 //打印指定数量字符串
@@ -204,15 +220,7 @@ int uitoas(unsigned int num,char *str,int cardinal)
         str[num]='\0';
         return num;
 }
-
-//输出一行字符串
-/*size_t sys_printl(const char* str,...)
-{
-        
-}
-*/
 //磁盘操作
-
 //读取指定磁盘的扇区
 //mem：读取到的内存；secaddr：需要读取的扇区；num：需要读取的扇区数(不能超过256个扇区)；HDD：主盘=0，从盘=1
 //返回读取的字节数，至少大于等于512字节，否则即为错误码，磁盘读取出错
@@ -259,7 +267,7 @@ int sys_readDisk(void* mem,uint32 secaddr,uint8 num,uint8 HDD)
         "cmp $0x08,%%ah\n\t"
         "jnz rloop1f7\n\t"
         //从0x1f0端口读取数据
-        "mov $0x1f0,%%dx\n\t"
+        "mov $0x1f0,%%edx\n\t"
         "shl $8,%%ecx\n"          //ecx储存了读取的扇区数，然后乘以256，等于要读取的字（2字节）数量
 "rloopread:\n\t"
         "in %%dx,%%ax\n\t"
@@ -276,7 +284,7 @@ int sys_readDisk(void* mem,uint32 secaddr,uint8 num,uint8 HDD)
 "rexitread:\n\t"
         :"=c"(errsign),"=a"(errcode),"=D"(endaddr)
         :"d"(0x1f7),"c"(num&0xff),"b"(secaddr),"S"((HDD&0x01)<<4),"D"((uint32)mem)
-        );
+        :"memory","cc");
         if(errsign==0xdfdfdfdf)return errcode;
         return endaddr-(uint32)mem;
 }
@@ -362,3 +370,4 @@ int sys_writeDisk(void* mem,size_t length,uint32 secaddr,uint8 HDD)
         :"edx","eax");
 return num*512;//返回写入的数据长度，单位：字节
 }
+

@@ -9,37 +9,35 @@
 #include<task.h>
 #include<mp.h>
 #include<ldt.h>
-//#include<lapic.h>
+#include<stdio.h>
+#include<malloc.h>
+#include<fs/lx.h>
+#include<file.h>
 
-#define NR_TASKS 1
-//PROCESS proc_table[NR_TASKS];
-//seg_sel ldt_s;
-
-
-#define LDTS 
+#pragma GCC push_options
+#pragma GCC optimize ("O0")
 int _system()
 {
         asm_cli();
         initsys_info();//初始化系统需要的信息
         //内存大小
         sys_printk("Memory size = %d Mb\n",_MEMORY_SIZE>>8);
-        //asm_cpu_hlt();
-        //init_mp();//初始化多处理器
-        sys_printk("init GDT\n");
         init_gdt();//重置gdt表
-        sys_printk("init memory.\n");
         init_mem();//初始化内存
-        sys_printk("init IDT table.\n");
         init_int();//初始化中断描述表
-        sys_printk("init task.\n");
-        //open_intn(0x20);//打开计时器中断
         init_task();//初始化任务
-        sys_printk("entry initpro().\n");
-        //asm_sti();
-        //切入0号进程
+         //初始化文件系统
+        if(!init_lx() || creat_tree(CREATE_TREE_DISK)<0)
+                goto hlt_system;
+        printf("init lxfs done.\n");
+
+        //切入进程
         restart();
+
+        hlt_system:
         for(;;){
                 asm_cpu_hlt();
         }
         return 0;
 }
+#pragma GCC pop_options

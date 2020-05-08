@@ -1,2 +1,2 @@
 cle:
-	$(RM) *.out *.o *.bin
+	$(RM) *.out *.o *.bin *.txt

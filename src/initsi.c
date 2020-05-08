@@ -42,14 +42,12 @@ uint32 _TIME_BASE_CENTURY_YEAR=0;//世纪,2000
 
 //tss_struct * init_tss();
 
-void loadelf(void *elfaddr);//加载的elf文件地址
-void readseg(char* pa,uint32 count,uint32 offset);
 void initsys_info()
 {
         
         //读取系统信息页，该页保存了开机时由boot.asm和head.asm写入的信息
         system_info *si=(system_info*)SYSTEM_INFO;
-        sys_printk("initsys_info:SYSTEM_INFO=0x%x\n",SYSTEM_INFO);
+        //sys_printk("initsys_info:SYSTEM_INFO=0x%x\n",SYSTEM_INFO);
         //初始磁盘信息
         _DISK_UNIT=si->bootbk.Unit;
         _DISK_BYTEPERSEC=si->bootbk.BytePerSec;
@@ -62,7 +60,7 @@ void initsys_info()
         //初始内存信息
         _MEMORY_SIZE=TakeMemorySize();
         _MEMORY_PAGE_SIZE=4096;
-        sys_printk("initsys_info():_MEMORY_SIZE=0x%x\n",_MEMORY_SIZE);
+        //sys_printk("initsys_info():_MEMORY_SIZE=0x%x\n",_MEMORY_SIZE);
         //初始化显示器信息
         _DISPLAY_MDOE=si->display_mode;
         switch(_DISPLAY_MDOE){

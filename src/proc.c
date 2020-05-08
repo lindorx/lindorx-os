@@ -16,18 +16,10 @@ void pushcli(void)
 {
         eflags = asm_load_eflags();
         asm_cli();
-        /*if(mycpu()->ncli == 0)
-                mycpu()->intena = eflags & FL_IF;*/
-        //ycpu()->ncli += 1;
 }
 
 void popcli(void)
 {
-  /*if(readeflags()&FL_IF)
-    panic("popcli - interruptible");
-  if(--mycpu()->ncli < 0)
-    panic("popcli");*/
-  //if(mycpu()->ncli == 0 && mycpu()->intena)
   if(eflags & FL_IF)
         asm_sti();
 }
@@ -55,11 +47,9 @@ pid_t sys_fork(void)
         pid_t pid;
         struct task_struct *nt;
         struct task_struct *curt=mytask();
-        sys_printk("eip=0x%x\n",curt->proc.tf->eip);
-        sys_printk("fork:now task=0x%x\n",curt);
         //申请新的任务空间
         if((nt=alloctask())==NULL){
-                sys_printk("(nt=alloctask())==NULL");
+                //sys_printk("(nt=alloctask())==NULL");
                 return -1;
         }
         //复制原进程trapframe
@@ -67,10 +57,6 @@ pid_t sys_fork(void)
         nt->proc.parent=curt;
         memcpy(nt->proc.tf,curt->proc.tf,sizeof(struct trapframe));
         nt->proc.tf->eax=0;
-        //复制文件数组
-
-        //````
-
         //复制进程名
         safestrcpy(nt->proc.name,curt->proc.name,sizeof(curt->proc.name));
         //获取进程号
@@ -82,7 +68,7 @@ pid_t sys_fork(void)
         //创建子进程的页表，由于子进程页表复制自父进程，因此子进程也会被设置为不可写状态
         nt->proc.pgdir=copyuvm(curt->proc.pgdir,curt->proc.sz);
         if(nt->proc.pgdir==NULL){
-                sys_printk("nt->proc.pgdir==NULL\n");
+                //sys_printk("nt->proc.pgdir==NULL\n");
                 return -1;
         }
              
@@ -90,33 +76,20 @@ pid_t sys_fork(void)
         acquire(&tasklist.lock);
         nt->proc.state=RUNNABLE;
         release(&tasklist.lock);
-        sys_printk("fork:return.\n");
+        //sys_printk("fork:return.\n");
         return pid;
 }
 
 void
 forkret(void)
 {
-  //static int first = 1;
-  // Still holding ptable.lock from scheduler.
+
   release(&tasklist.lock);
-
-  /*if (first) {
-    // Some initialization functions must be run in the context
-    // of a regular process (e.g., they call sleep), and thus cannot
-    // be run from main().
-    first = 0;
-    //iinit(ROOTDEV);
-    //initlog(ROOTDEV);
-  }*/
-
-  // Return to "caller", actually trapret (see allocproc).
 }
-
 
 void scheduler(void)
 {
-        sys_printk("scheduler:\n");
+        //sys_printk("scheduler:\n");
         struct task_struct *t=nowtask;
         //任务锁
         acquire(&tasklist.lock);
@@ -145,25 +118,4 @@ void switchuvm(struct task_struct *t)
 void switchkvm()
 {
         asm_store_cr3(PAGE_DIR_ADDR);
-}
-
-void sched()
-{
-        struct task_struct *t=mytask();
-        if(t->proc.state==RUNNING)
-                panic("sched running");
-        if(asm_load_eflags() & FL_IF)
-                panic("sched interruptible");
-        swtch(&(t->proc.context),pbufcontext);
-
-}
-
-
-//切换任务
-void yield()
-{
-        acquire(&tasklist.lock);
-        mytask()->proc.state=RUNNABLE;
-        sched();
-        release(&tasklist.lock);
 }

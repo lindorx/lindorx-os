@@ -19,7 +19,7 @@
 struct PAGEITEM{
 	union{
 		struct{
-			uint P:1;		//P：存在位；
+	uint P:1;		//P：存在位；
 	uint R_W:1;		//R/W：读写标志；
 	uint U_S:1;		//U/S：用户特权级；
 	uint nul1:2;		//空
@@ -72,13 +72,13 @@ typedef struct PAGEITEM pageitem;
 #define _page_pte_setnuse(a) (a)->AVL=FALSE
 //将指定地址对应的页设置为占用
 //参数a：地址。
-#define _page_setuse(a) _page_pte_setocc(_page_addr2pte(a));
+//#define _page_setuse(a) _page_pte_setocc(_page_addr2pte(a));
 
 #define _PAGE_INUSE 1
 #define _PAGE_UNUSE 0
 //将若干页的页表设置为已占用
 //a：需要设置的起始地址；n：需要设置页数；u：选项
-#define _pages_useset(a,n,u) do{				\
+#define _pages_setuse(a,n,u) do{				\
 			pte_t *p=_page_addr2pte(PAGE_TABLE_VA,a);		\
 			pte_t *endp=p+(n);			\
 			for(p;p<endp;++p){			\
@@ -91,6 +91,9 @@ typedef struct PAGEITEM pageitem;
 
 #define _page_pdx(va) (((uint)(va) >> PDXSHIFT) & 0x3FF)	//获取地址对应的页目录项下标
 #define _page_ptx(va) (((uint)(va )>> PTXSHIFT) & 0x3FF)	//获取地址对应的页表项下标
+
+//将地址转换为指定页目录表示的页表项
+#define _page_addr2pdte(pgdir,va) ()
 
 //添加内存分配表表项，返回表大小,start:物理起始地址，vsatrt：虚拟起始地址，占用长度，ID
 int memoccupy(void *start,void *vstart,uint size,uint ID);
@@ -120,3 +123,11 @@ pde_t *page_set_rw(pde_t *pgdir,uint sz,int sign);
 //复制用户页表
 /*方法：复制父进程页表*/
 pde_t *copyuvm(pde_t * par, uint sz);
+
+//在用户空间寻找映射页
+//返回可以映射的虚拟地址
+char *_user_get_mapaddr(pde_t *pgdir,unsigned long n);
+
+//将pp页映射到vp页
+//flag:标志
+int mappage(pde_t *pgdir,void *pa,void *va,uint flags);

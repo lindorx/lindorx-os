@@ -10,3 +10,5 @@ unsigned int pow_uint(unsigned int x,unsigned int y);
 double sqrt(double x);
 //返回x开方的倒数
 double invsqrt(double x);
+//求x是2的多少次方(长整数)，取最大值
+int get_2order(unsigned long x);

@@ -26,6 +26,7 @@ unsigned long pow_ulong(unsigned long x,unsigned long y)
         }
         return value;
 }
+
 unsigned int pow_uint(unsigned int x,unsigned int y)
 {
         unsigned long v=x;
@@ -61,3 +62,20 @@ double invsqrt(double x)
 return 1/x;
 }
 
+//求x是2的多少次方(长整数)，取最大值
+int get_2order(unsigned long x)
+{
+        /*方法，获取是1的最高位的位置，例如8->1000,1在位3，所以是2^3，
+        如果是9->1001，就取最大值4*/
+        int n = 0, bits = sizeof(long) * 8;
+        unsigned long a = x;
+        if (x == 0)return -1;
+        while (!(a & (1 << (bits - 1)))) {
+                n++;
+                a <<= 1;
+        }
+        n = bits - n;
+        if ((x & (x - 1)) == 0)
+                n--;
+        return n;
+}

@@ -39,6 +39,10 @@ KOFILES=${patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(KCFILES)} ${patsubst $(SRCDIR)/
 KINTFS=$(DEVDIR)/int.c	#int.c文件需要不同的编译参数，单独编译
 KINTOFS=${patsubst $(DEVDIR)/%.c,$(OBJDIR)/%.o,$(KINTFS)}	#中断的工程文件
 
+#dev文件
+DEVCFS=${filter-out $(KINTFS), ${wildcard $(DEVDIR)/*.c}}	#dev目录的所有除int.c的文件
+DEVOFS=${patsubst $(DEVDIR)/%.c,$(OBJDIR)/%.o,$(DEVCFS)}
+
 #>>>系统
 #bootloder
 BOOTLODER=$(BINDIR)/bootloder.bin
@@ -50,16 +54,15 @@ HEAD_SECN=15		#head占用扇区数，
 HEAD_SIZE=$(shell powershell $(HEAD_SECN)*512)	#HEAD_SECN*512，head大小
 LK_SECN=16		#lk程序占用扇区数
 LK_SIZE=$(shell powershell $(LK_SECN)*512)	#LK_SECN*512,lk大小
-LK_LOAD_ADDR=${shell powershell (\'0x\'+(0x7e00+$(HEAD_SIZE)).ToString(\'x\'))}	#load_kernel被加载的位置	
+LK_LOAD_ADDR=${shell powershell (\'0x\'+(0x7c00+$(HEAD_SIZE)).ToString(\'x\'))}	#load_kernel被加载的位置	
 LK_SEEK_SEC=16	#lk在bootloder的扇区
 
 #镜像文件名称
 IMG=lindorx.img
-IMG_SIZE=1088
+IMG_SIZE=131072	#单位扇区，64mb
 #内核程序
 KBIN=$(ROOTDIR)/$(BINDIR)/kernel.out
 KERNEL_LOAD=$(BOOTLODER_SIZE)	#内核的加载位置
-
 
 #>>>软件参数
 #ar打包参数
@@ -80,6 +83,7 @@ CCLIST=-nostdinc -O2\
 	-Wall -Wno-format -Wno-unused -Wno-array-bounds -Wno-int-conversion\
 	-gstabs -m32\
 	-DJOS_KERNEL -c \
+	-fno-builtin\
 	$(CC_INCLUDE)	\
 	$(CC_DEPS)
 
@@ -90,12 +94,15 @@ all: $(IMG)
 
 -include $(DEPDIR)/*.d
 
+
 #>>>编译内核
 #创建kernel.out
 $(IMG): $(KBIN) $(BOOTLODER) 
-	dd if=/dev/zero of=$(IMG) bs=512 count=$(IMG_SIZE)
-	dd if=$(BOOTLODER) of=$(IMG)
+	./lxfs img=$(IMG) format
+	./cpboot $(BOOTLODER) $(IMG)
 	dd if=$(KBIN) of=$(IMG) seek=$(KERNEL_LOAD) conv=notrunc
+#dd if=$(BOOTLODER) of=$(IMG)
+#dd if=/dev/zero of=$(IMG) bs=512 count=$(IMG_SIZE)
 	
 #引导
 #以下创建引导程序bootloder.bin
@@ -121,7 +128,7 @@ $(BOOTCBIN):$(BCFILES)
 
 #生成kernel程序
 #链接内核，并将内核编译为elf格式
-$(KBIN):$(KOFILES) $(KINTOFS)
+$(KBIN):$(KOFILES) $(KINTOFS) $(DEVOFS)
 	$(LD) $(LDLIST) $(ROOTDIR)/$(BINDIR)/kernel.out $(OBJDIR)/*.o
 	objcopy $(COFF_TO_ELF) $(ROOTDIR)/$(BINDIR)/kernel.out $(KBIN)
 
@@ -130,6 +137,9 @@ $(OBJDIR)/%.o:$(SRCDIR)/%.c
 	$(CC) $< -o $@ $(CCLIST) 
 
 $(OBJDIR)/%.o:$(SRCDIR)/%.S
+	$(CC) $< -o $@ $(CCLIST)
+
+$(OBJDIR)/%.o:$(DEVDIR)/%.c
 	$(CC) $< -o $@ $(CCLIST)
 
 #编译中断程序
@@ -141,7 +151,9 @@ $(KINTOFS):$(KINTFS)
 clean:
 	@cd $(OBJDIR) && make cle
 	@cd $(BOOTDIR) && make cle
-	
+
+cleboot:
+	@cd $(BOOTDIR) && make cle
 
 run:	#运行镜像
 	bochs -f bochsrc.txt

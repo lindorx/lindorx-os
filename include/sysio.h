@@ -1,6 +1,7 @@
 #pragma once
 
 #include<macro.h>
+#include<vadefs.h>
 
 #define TEXT_COLOR 0X02
 #define TEXT_WIDTH 80
@@ -39,29 +40,13 @@ struct TEXT_DISPLPY_CHAR{
 typedef unsigned int size_t;
 uint32 get_cursor();
 void put_cursor(uint32 n);
-/*
-//向终端打印字符串
-int sys_printk(const char* str,size_t length,char font_color,char background_color);
-//特殊字符处理
-//dp：显示缓冲区位置；cursor_pos：光标位置；ch：待输出字符
-int put_ctlch(struct TEXT_DISPLPY_CHAR* dp,int cursor_pos,char ch);
-//向显示屏打印一个字符
-int sys_putchar(int ch,char font_color,char background_color);
-//判断str长度
-int strlen(const char * str);
-//字符串打印
-int sys_printf(const char* str, ...);
+//输出字符串处理
+int sys_printv(const char*str,va_list va);
 
-//读取指定磁盘的扇区
-//mem：读取到的内存；secaddr：需要读取的扇区；num：需要读取的扇区数；HDD：主盘=0，从盘=1
-int sys_readDisk(void* mem,uint32 secaddr,uint32 num,int HDD);
-//向指定磁盘写入数据
-//mem：源数据地址；length：数据长度；secaddr：写入扇区；HDD：主盘=0，从盘=1
-int sys_writeDisk(void* mem,uint32 length,uint32 secaddr,int HDD);
-
-*/
 //格式化输出函数，直接向终端打印字符串
 int sys_printk(const char* str,...);
+//向控制台打印一个字符
+int sys_putchar(char ch);
 //打印指定数量字符串
 int sys_printstr(const char*str,int n,int pos,struct TEXT_DISPLPY_CHAR*dp);
 //控制字符处理

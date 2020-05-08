@@ -32,7 +32,7 @@ struct task_struct *nowtask=NULL;//指向当前任务
 int init_task()
 {
 	task=alloctask();
-	sys_printk("init_task():task=0x%x\n",task);
+	//sys_printk("init_task():task=0x%x\n",task);
 	if(task==NULL)
 		panic("init_task:alloctask() error.");
 	tasklist.task=task;
@@ -44,8 +44,8 @@ int init_task()
 	task->ldt[_TASK_LDT_DS].DPL=_FIRST_TASK_DPL;
 	task->ldtsz=TASK_LDT_SZIE;
 	//sys_printk("gdt=0x%x\n",gdt[1].base0+(gdt[1].base1<<16));
-	sys_printk("gdt addr=0x%x\n",gdt);
-	sys_printk("ldt addr=0x%x\n",task->ldt);
+	//sys_printk("gdt addr=0x%x\n",gdt);
+	//sys_printk("ldt addr=0x%x\n",task->ldt);
 
 	//sys_printk("ldt=0x%x\n",task->ldt[0].base0+(task->ldt[0].base1<<16));
 	//初始化进程
@@ -68,13 +68,13 @@ int init_task()
 	seg_s tss_s=step_up_gdt(INDEX_TSS,&tss,sizeof(tss),_GDT_TSS_TYPE_NO_BUSY,0,0,1,0,0,0);
 	memset(&tss,0,sizeof(tss));
 	tss.ss0=OS_DATA_SEG;//设置堆栈
-	sys_printk("set tss done.\n");
+	//sys_printk("set tss done.\n");
 	//将tss的段选择子加载到ltr寄存器
 	asm volatile("xor %%eax,%%eax\n\t"
         "mov %0,%%ax\n\t"
         "ltr %%ax\n\t"
         ::"m"(tss_s));
-	sys_printk("install tss done.\n");
+	//sys_printk("install tss done.\n");
 	nowtask=task;
    return 0;     
 }
@@ -153,7 +153,7 @@ struct task_struct *alloctask()
 	static pid_t nextpid=0;
 	//获取一块内存储存进程结构
 	t=(struct task_struct*)__kmalloc(sizeof(struct task_struct));
-	sys_printk("alloctask():t=0x%x\n",t);
+	//sys_printk("alloctask():t=0x%x\n",t);
 
 	if(t==NULL)return NULL;
 	memset(t,0,sizeof(struct task_struct));
@@ -161,7 +161,7 @@ struct task_struct *alloctask()
 	t->proc.pid=nextpid++;
 	char *sp;
 	t->proc.kstack=__get_free_pages(___GFP_KMEM,_PROC_STACK_PAGES_ORDER);
-	sys_printk("alloctask:t->proc.kstack=0x%x\n",t->proc.kstack);
+	//sys_printk("alloctask:t->proc.kstack=0x%x\n",t->proc.kstack);
 
 	if(t->proc.kstack==NULL){
 		__kfree(t);
@@ -200,4 +200,45 @@ pid_t fork()
 struct task_struct *mytask()
 {
 	return nowtask;
+}
+
+//初始化一个用户任务
+int init_utask()
+{
+	task=alloctask();
+	//sys_printk("init_task():task=0x%x\n",task);
+	if(task==NULL)
+		panic("init_task:alloctask() error.");
+	tasklist.task=task;
+	//初始化任务的局部描述表
+	task->ldts=step_up_gdt(3,task->ldt,sizeof(GDTtable)*TASK_LDT_SZIE,_GDT_TYPE_DATA_H_RW,_GDT_S_0,1,1,0,0,_GDT_G_BYTE);
+	memcpy(&(task->ldt[_TASK_LDT_CS]),&gdt[OS_CODE_SEG>>3],sizeof(ldt_t));
+	task->ldt[_TASK_LDT_CS].DPL=_FIRST_TASK_DPL;
+	memcpy(&(task->ldt[_TASK_LDT_DS]),&gdt[OS_DATA_SEG>>3],sizeof(ldt_t));
+	task->ldt[_TASK_LDT_DS].DPL=_FIRST_TASK_DPL;
+	task->ldtsz=TASK_LDT_SZIE;
+
+	//初始化进程
+	task->proc.sz=1;
+	task->proc.pgdir=PAGE_DIR_VA;
+	memset(task->proc.name,"initpro",8);
+	task->next1=task;
+	task->prev1=task;
+	//设置段寄存器
+	task->proc.tf->cs=_FIRST_TASK_CS;
+	task->proc.tf->ds=_FIRST_TASK_DS;
+	task->proc.tf->es=_FIRST_TASK_DS;
+	task->proc.tf->fs=_FIRST_TASK_DS;
+	task->proc.tf->ss=_FIRST_TASK_DS;
+	task->proc.tf->gs=_FIRST_TASK_DS;
+	task->proc.tf->eip=(uint32)initpro;
+	task->proc.tf->esp=0xc0000000;
+	task->proc.tf->eflags=0x1000;
+	//设置tss
+	seg_s tss_s=step_up_gdt(INDEX_TSS,&tss,sizeof(tss),_GDT_TSS_TYPE_NO_BUSY,0,0,1,0,0,0);
+	memset(&tss,0,sizeof(tss));
+	tss.ss0=OS_DATA_SEG;//设置堆栈
+	//sys_printk("set tss done.\n");
+	nowtask=task;
+	return 0;
 }

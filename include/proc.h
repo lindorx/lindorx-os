@@ -74,53 +74,6 @@ struct proc {
   char name[16];                 // 进程名称（调试使用）
 };
 
-
-//测试------------------------------------------------------
-
-/*typedef unsigned int t_32;
-typedef unsigned short t_16;
-
-typedef struct s_stackframe{
-  t_32 gs;
-  t_32 fs;
-  t_32 es;
-  t_32 ds;
-  t_32 edi;
-  t_32 esi;
-  t_32 ebp;
-  t_32 kernel_esp;
-  t_32 ebx;
-  t_32 edx;
-  t_32 ecx;
-  t_32 eax;
-  t_32 retaddr;
-  t_32 eip;
-  t_32 cs;
-  t_32 eflags;
-  t_32 esp;
-  t_32 ss;
-}STACK_FRAME;
-
-#define LDT_SIZE 2
-//进程结构
-typedef struct s_proc{
-  STACK_FRAME regs;
-  t_16 ldt_sel;
-  ldt_t ldts[LDT_SIZE];
-  size_t ldtsz;//记录ldt的数量
-  t_32 pid;
-  char p_name[16];
-}PROCESS;
-
-#define P_STACKBASE 0
-#define GSREG (P_STACKBASE+4)
-#define FSREG (GSREG+4)
-
-#define P_STACKTOP 72
-#define P_LDT_SEL 72
-#define p_LDT 76
-*/
-
 //将可运行的a任务加入一级链表
 #define task_run_insert(a) do{  \
   (a)->prev1=(task);         \

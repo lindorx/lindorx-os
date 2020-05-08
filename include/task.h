@@ -64,3 +64,5 @@ pid_t fork();
 
 //当前任务
 struct task_struct *mytask();
+
+int init_utask();

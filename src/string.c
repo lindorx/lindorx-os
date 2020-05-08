@@ -3,7 +3,7 @@
 //数据复制
 void* memcpy(void *destin,void *source,unsigned int n)
 {
-        sys_printk("memcpy:des=0x%x,src=0x%x,size=0x%x\n",destin,source,n);
+        //sys_printk("memcpy:des=0x%x,src=0x%x,size=0x%x\n",destin,source,n);
         int i,a;
         for(i=0;i<n/sizeof(ptr_t);++i){
                 ((ptr_t*)destin)[i]=((ptr_t*)source)[i];
@@ -25,7 +25,7 @@ size_t strlen(char *str)
 //将指定内存块设置为指定的值
 void *memset(void *src,int val,size_t n)
 {
-        sys_printk("memset:src=0x%x,val=0x%x,size=0x%x\n",src,val,n);
+        //sys_printk("memset:src=0x%x,val=0x%x,size=0x%x\n",src,val,n);
         size_t i;
         val=val+(val<<8)+(val<<16)+(val<<24);
         for(i=0;i<n/sizeof(ptr_t);++i){
@@ -47,4 +47,27 @@ char * safestrcpy(char *s,const char *t,int n)
         while(--n > 0 && (*s++ = *t++) != 0);
         *s = 0;
   return os;
+}
+char *strchr(const char *s,int c)
+{
+        while(*s != '\0'){
+                if(*s == (char)c )
+                        return (char *)s;
+                s++;
+        }
+        return NULL;
+}
+
+int strncmp(const char *str1, const char *str2, size_t n)
+{
+        size_t i;
+        for(i=0;i<n;++i){
+                if(str1[i]<str2[i]){
+                        return -1;
+                }
+                if(str1[i]>str2[i]){
+                        return 1;
+                }
+        }
+        return 0;
 }

@@ -1,41 +1,24 @@
-#include<sysio.h>
-#include<_asm.h>
-#include<task.h>
 
-//第一个程序
-/*初始化所有需要开机启动的程序*/
+#include<_asm.h>
+#include<stdio.h>
+#include<stdlib.h>
+
 #pragma GCC push_options
 #pragma GCC optimize ("O0")
 void initpro()
 {
-        sys_printk("init progma start\n");
-        //载入文件管理程序
-        sys_printk("call fork()\n");
-        int pid=fork();
-        if(pid<0){
-                sys_printk("--initpro:failure to fork.\n");
+        //文件系统测试
+        FILE *fget=fopen("test.txt","rb");
+        if(fget==NULL){
+                return;
         }
-        else if(pid==0){
-                sys_printk("--initpro:child process");
-                //scheduler();
-                //yield();
-        }
-        else{
-                sys_printk("--initpro:fork successful.pid=%d\n",pid);
-                scheduler();
-                //yield();
-        }
-        //asm_sti();
+        char* buf=(char*)malloc(100);
+        fread(buf,100,1,fget);
+        printf("%s\n",buf);
         for(;;){
                 asm_cpu_hlt();
         }
 return;
-}
-
-//第二个程序
-void test1()
-{
-        sys_printk("Test the program, fork () and exec () work.\n");
 }
 
 #pragma GCC pop_options

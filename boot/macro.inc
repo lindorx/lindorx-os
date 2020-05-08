@@ -1,13 +1,5 @@
-;0-0x1fff被gdt表占用
-;0x2000-0x2fff被idt表占用
-;0x3000-0xfffff为空，其中0xb8000之后为显示缓存区，因此可以利用的空间大小为0xb8000-0x3000=0xb5000，共724kb
-;上述空间用来存放系统相关信息
-;0x100000-0x501000为页表
-;0x501000-0x600000为系统堆栈，共1020kb
+;引导扇区文件系统
 
-;GDT表
-;GDT_ADDR EQU 0x501000		;GDT被加载的位置
-;GDT_ADDR equ 0x7c00
 
 ;head.asm
 HEAD_ADDR EQU 0x7E00		;head被加载的位置
@@ -15,7 +7,7 @@ HEAD_SECN EQU 31		;head大小
 HEAD_SIZE EQU (HEAD_SECN*512)		;head占用扇区数
 
 ;load_kernel程序被加载地址
-LK_ADDR equ 0x00009ce0 	;要被加载的位置，0x7c00+512*32
+LK_ADDR equ 0x00009ae0 	;要被加载的位置，0x7c00+512*32
 LK_SECN equ 16		;load_kernel硬盘位置，单位：扇区
 LK_SIZE equ (LK_SEC*512)	;load_kernel程序长度，单位：扇区
 
@@ -59,13 +51,13 @@ PAGE_SIZE EQU (0x400000+0x1000)	;页目录+页表长度
 PGSIZE EQU 4096			;页大小，字节
 ;内核
 KERNEL_SECTOR equ 32		;内核在硬盘中扇区位置
-KERNEL_SIZE equ 256		;内核长度，单位扇区
+KERNEL_SIZE equ (560)		;内核长度，单位扇区
 KERNEL_PADDR equ 0x600000	;内核被加载的物理地址
 KERNEL_VADDR equ 0xc0600000	;内核被加载的虚拟地址
 
 KERNEL_STACK_SIZE equ (32*4096)		;内核堆栈大小
-KERNEL_STACK_PADDR equ (KERNEL_PADDR+KERNEL_SECTOR*512)	;内核堆栈块内存的起始物理地址
-KERNEL_STACK_VADDR EQU (KERNEL_VADDR+KERNEL_SECTOR*512)	;内核堆栈的起始虚拟地址
+KERNEL_STACK_PADDR equ (KERNEL_PADDR+KERNEL_SIZE*512)	;内核堆栈块内存的起始物理地址
+KERNEL_STACK_VADDR EQU (KERNEL_VADDR+KERNEL_SIZE*512)	;内核堆栈的起始虚拟地址
 KERNEL_STACK_VBOTADDR equ (KERNEL_STACK_VADDR+KERNEL_STACK_SIZE)	;内核堆栈底栈虚拟地址
 KERNEL_STACK_PBOTADDR equ (KERNEL_STACK_PADDR+KERNEL_STACK_SIZE)	;内核堆栈底栈物理地址
 
@@ -250,4 +242,4 @@ INT47 EQU seccondary_ide_int
 INT47_SEG EQU 0x08
 
 INT128 EQU _syscall
-INT128_SEG EQU 0x08
+INT128_SEG EQU 0x0888

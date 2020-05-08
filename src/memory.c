@@ -4,6 +4,7 @@
 #include<mem.h>
 #include<gdt.h>
 #include<page.h>
+#include<task.h>
 //内存探查子程序
 uint32 _take_memory_size()
 {//折半查找
@@ -136,8 +137,8 @@ char* init_mem()
         _KERNEL_END_VADDR=_PMEM_SIZE+KERNEL_ADDR;
         _KERNEL_END_PADDR=_PMEM_START;
 
-        sys_printk("init_mem:_PMEM_START=0x%x,_PMEM_SIZE=%d\n",_PMEM_START,_PMEM_SIZE);
-        sys_printk("init_mem:_KERNEL_END_VADDR=0x%x,_KERNEL_END_PADDR=0x%x\n",_KERNEL_END_VADDR,_KERNEL_END_PADDR);
+        //sys_printk("init_mem:_PMEM_START=0x%x,_PMEM_SIZE=%d\n",_PMEM_START,_PMEM_SIZE);
+        //sys_printk("init_mem:_KERNEL_END_VADDR=0x%x,_KERNEL_END_PADDR=0x%x\n",_KERNEL_END_VADDR,_KERNEL_END_PADDR);
         
         //__get_free_pages()使用
         _PMEM_LIST_FIRST_NODE=_PMEM_START;//初始化物理内存管理链表
@@ -145,7 +146,7 @@ char* init_mem()
         //_MEMORY_SIZE记录了物理内存的大小，单位：页
         _PMEM_LIST_FIRST_NODE->size=_MEMORY_SIZE*PGSIZE-(uint)_PMEM_START;
         _PMEM_LIST_FIRST_NODE->next=NULL;
-        sys_printk("init_mem:_PMEM_LIST_FIRST_NODE=0x%x,_PMEM_LIST_FIRST_NODE->size=0x%x\n",_PMEM_LIST_FIRST_NODE,_PMEM_LIST_FIRST_NODE->size);
+        //sys_printk("init_mem:_PMEM_LIST_FIRST_NODE=0x%x,_PMEM_LIST_FIRST_NODE->size=0x%x\n",_PMEM_LIST_FIRST_NODE,_PMEM_LIST_FIRST_NODE->size);
 
         //使用__get_free_pages()申请一块内存，用来为__kmalloc()初始化空间
         _MEM_BLOCK_LIST_FIRST_NODE=(struct mem_list*)__get_free_pages(___GFP_KMEM,_KMALLOC_INIT_MB_ORDER);//申请2^4=16页作为初始块
@@ -155,6 +156,17 @@ char* init_mem()
         _MEM_BLOCK_LIST_FIRST_NODE->size=(size_t)pow_uint(2,(unsigned int)_KMALLOC_INIT_MB_ORDER)*4096;
         _MEM_BLOCK_LIST_FIRST_NODE->sign=_MEM_LIST_SIGN;
         
+        //初始化内核页表占用位
+        pte_t *pt=PAGE_TABLE_VA,*ekpt;
+        _page_pte_setuse(pt);//将第一页设置为占用
+        //将内核空间开始到堆栈之间的内存设置为已占用
+        ekpt=&pt[KERNEL_STACK_VBOTADDR>>12];
+        //sys_printk("init_mem:pt=0x%x,ekpt=0x%x\n",&pt[KERNEL_SPACE_BASE>>12],&pt[KERNEL_STACK_VBOTADDR>>12]);
+        for(pt=&pt[KERNEL_SPACE_BASE>>12];pt<ekpt;pt++){
+                //sys_printk("init_mem: pt=0x%x\n",pt);
+                _page_pte_setuse(pt);
+        }
+        //sys_printk("init_mem compile.\n");
         return (char*)INITIALLY_UNUSED_MEMORY_ADDR;
 }
 
@@ -163,7 +175,7 @@ unsigned long __pmalloc_pages(uint n)
 {
         //从_PMEM_LIST_FIRST_NODE获得内存链表的第一个节点，以此在链表中寻找可以使用的内存
         //找到符合大小的内存块，将链表移动到该内存块之后的一页
-        sys_printk("__pmalloc_pages:n=0x%x,list=0x%x\n",n,_PMEM_LIST_FIRST_NODE);
+        //sys_printk("__pmalloc_pages:n=0x%x,list=0x%x\n",n,_PMEM_LIST_FIRST_NODE);
         free_mem_list *a=_PMEM_LIST_FIRST_NODE;
         char find=FALSE;
         while(a){
@@ -180,7 +192,7 @@ unsigned long __pmalloc_pages(uint n)
                         find=TRUE;
                 }
                 if(find){
-                        sys_printk("__pmalloc_pages:return 0x%x\n",a);
+                       // sys_printk("__pmalloc_pages:return 0x%x\n",a);
                         //asm_cpu_hlt();
                         return (unsigned long)a;
                 }
@@ -203,22 +215,49 @@ return NULL;
 //内核空间必须分配物理内存
 unsigned long __kmalloc_pages(unsigned long n)
 {
-        /*char *m=_kernel_get_mapaddr(n);//在内核空间获取一个可以映射的地址
-        sys_printk("__kmalloc_pages():kernel_get_mapaddr=0x%x\n",m);
+        char *m=_kernel_get_mapaddr(n);//在内核空间获取一个可以映射的地址
+        //sys_printk("__kmalloc_pages():kernel_get_mapaddr=0x%x\n",m);
         if(m==NULL)//无法找到
-                return NULL;*/
+                return NULL;
         char *a=__pmalloc_pages(n);
-        char *m=P2V(a);
-        sys_printk("__kmalloc_pages():pmalloc=0x%x\n\0",a);
+        //char *m=P2V(a);
+        //sys_printk("__kmalloc_pages():pmalloc=0x%x\n\0",a);
         if(a==NULL)
                 return NULL;
         //将a指向的地址映射到m
         mapping_pages(PAGE_TABLE_VA,a,m,n);
         //将被映射的地址设置为不可用
-        //_pages_useset(m,n,_PAGE_INUSE);
-        sys_printk("__kmalloc_pages():return 0x%x\n",m);
+        _pages_setuse(m,n,_PAGE_INUSE);
+        //sys_printk("__kmalloc_pages():return 0x%x\n",m);
         
 return m;
+}
+
+//从用户空间分配页
+static unsigned long __umalloc_pages(unsigned long n)
+{
+        //需要从当前PCB中获取
+        //pdt_t *pgdir=nowtask.proc.pgdir;
+        pde_t *pgdir=PAGE_DIR_ADDR;
+        char *vm=_user_get_mapaddr(pgdir,n),*rvm;
+        
+        if(vm==NULL)
+                return NULL;
+        rvm=vm;
+        //在物理空间获取一块内存
+        char *pm=(char*)__pmalloc_pages(n);
+        if(pm==NULL)
+                return NULL;
+        //映射地址
+        char *epm=pm+n*PGSIZE;
+        //pde_t *vpt=&pgdir[_page_pdx(vm)];
+        //sys_printk("__umalloc_pages: pm=0x%x,vm=0x%x\n",pm,vm);
+        for(;pm<epm;pm+=PGSIZE,vm+=PGSIZE){
+                mappage(pgdir,pm,vm,0x107);
+                //if(mappage(pgdir,pm,vm,0x107)<0)
+                //return NULL;
+        }
+        return rvm;
 }
 
 //获取指定数量的空闲页
@@ -235,9 +274,10 @@ unsigned long __get_free_pages(gfp_t gfp_mask, unsigned int order)
                         a=__vmalloc_pages(n);
                 }break;
                 case ___GFP_KMEM:{//从内核空间分配
-                        sys_printk("__get_free_pages:Get kernel memory space.pages=%d\n",n);
                         a=__kmalloc_pages(n);
-                        sys_printk("__get_free_pages:__GFP_KMEM,return 0x%x\n",a);
+                }break;
+                case ___GFP_UMEM:{//从用户空间分配
+                        a=__umalloc_pages(n);
                 }break;
         }
         return a;
@@ -250,9 +290,8 @@ unsigned long __get_free_pages(gfp_t gfp_mask, unsigned int order)
 */
 void __free_pages(void* addr, unsigned int order)
 {       
-
         unsigned long n=(unsigned long)pow_ulong(2,order);
-        _pages_useset(addr,n,_PAGE_UNUSE);
+        _pages_setuse(addr,n,_PAGE_UNUSE);
         //将原物理内存加入内存链表
         free_mem_list *pmem=(free_mem_list*)(_page_addr2pte(PAGE_TABLE_VA,addr)->PB*4096);//获取该物理内存的地址
         if(_PMEM_LIST_FIRST_NODE==NULL){//说明之前内存没有空间了，将此内存块作为第一个节点
@@ -298,14 +337,14 @@ char* _get_pmem_start()
 //使用此函数申请的内存绝对不能越界，否则极可能造成内存泄露，并导致函数工作不正常
 void * __kmalloc(size_t size)
 {
-        sys_printk("kmalloc(): size=%d\n",size);
+        //sys_printk("kmalloc(): size=%d\n",size);
 
         //遍历整个链表，查找大于size的内存
         struct mem_list *t=_MEM_BLOCK_LIST_FIRST_NODE,*p;
         size_t num=(size/sizeof(ptr_t)+1)*sizeof(ptr_t);//需要申请的大小
         static uint n=0;
         do{
-                sys_printk("t=0x%x,t->next=0x%x\n",t,t->next);
+                //sys_printk("t=0x%x,t->next=0x%x\n",t,t->next);
                 if(n++>5)for(;;)asm_cpu_hlt();
                 if(t->size>size && t->type==_MEM_LIST_TYPE_NOTUSE){
                         //p指向申请好的内存块末尾，将剩余的内存重新设置为一个内存链块，加入内存链表
@@ -320,15 +359,15 @@ void * __kmalloc(size_t size)
                         t->size=num;
                         t->n=n++;//令申请次数加一
                         t->type=_MEM_LIST_TYPE_USER;
-                        sys_printk("kmalloc():t=0x%x,t->next=0x%x\n",t,t->next);
+                        //sys_printk("kmalloc():t=0x%x,t->next=0x%x\n",t,t->next);
                         return (char*)(++t);
                 }
                 t=t->next;
         }while(t!=_MEM_BLOCK_LIST_FIRST_NODE);
         //现有的内存不足，因此需要从内核空间一块内存
         struct mem_list *newmem=(struct mem_list*)__get_free_pages(___GFP_KMEM,_KMALLOC_GET_NUM_ORDER);
-        sys_printk("kmalloc():Get new memory space.newmem=0x%x\n",newmem);
-        sys_printk("kmalloc():t=0x%x\n",t);
+        //sys_printk("kmalloc():Get new memory space.newmem=0x%x\n",newmem);
+        //sys_printk("kmalloc():t=0x%x\n",t);
         if(newmem==NULL)return NULL;
         list_insert(newmem,t);
         newmem->file=NULL;
@@ -337,7 +376,7 @@ void * __kmalloc(size_t size)
         newmem->size=(size_t)pow_ulong(2,_KMALLOC_GET_NUM_ORDER)-sizeof(struct mem_list);
         newmem->n=0;
         newmem->sign=_MEM_LIST_SIGN;
-        sys_printk("kmalloc():list=0x%x,list->next=0x%x\n",t,t->next);
+        //sys_printk("kmalloc():list=0x%x,list->next=0x%x\n",t,t->next);
         return __kmalloc(size);
 }
 

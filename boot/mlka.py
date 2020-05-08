@@ -30,13 +30,15 @@ def read_lk_addr():
         print("not found load_kernel")
         return -1
     lk_addr=str(lk_addr.group())
+    print('lk addr = '+lk_addr)
     print('open ofile='+ofile)
     with open(ofile,'rb+') as f: 
+        print('write lk addr')
         macro_str=f.read().decode('utf-8') 
         f.seek(0,0)
-
         lk_addr_macro=re.search(r'LK_ADDR.*?equ.*?0x([0-9 | a-f]{8,})',macro_str)
         if lk_addr_macro==None:
+            print('not get old lk addr')
             return -1
         old_lk_addr=lk_addr_macro.span(1)
 

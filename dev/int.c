@@ -373,8 +373,6 @@ void * int_fun[INTRE_NUM]={
         syscall                 //128   0x80
 };
 
-
-
 /*初始化idt表*/
 void init_int()
 {

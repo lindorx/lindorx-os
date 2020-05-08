@@ -4,17 +4,24 @@
 ;head用来处理cpuid指令，开启分页，初始化中断，加载内核，初始化系统关键内存。。。
 include 'macro.inc'
 
+;信息块
+
+db 0xfd,0xff,0x01,0x00,0x21,0x00,0x00,0x00
+db 0xfe,0xff,0x01,0x00,0x5c,0xff,0x01,0x00
+db "LX-lindorx2020",0,0x80
+times 512-($-$$) db 0
+
 ;cpuid指令
 org 0x7e00
 
 use16
 ;保存内存信息
-	mov eax,0xe820
-	xor ebx,ebx
-	mov edi,MEMORY_INFO
-	mov ecx,20
-	mov edx,0x534d4150
-	int 0x15
+;	mov eax,0xe820
+;	xor ebx,ebx
+;	mov edi,MEMORY_INFO
+;	mov ecx,20
+;	mov edx,0x534d4150
+;	int 0x15
 ;=============================================================
 
 ;设置PE位，进入保护模式
@@ -217,23 +224,11 @@ mov eax,KERNEL_PADDR or PG_P or PG_RWW or PG_USS	;被映射地址
 	add ebx,4
 	add eax,0x1000
 	loop @b
-
-;call LK_ADDR	;切换到load_kernel程序
-;会返内核入口地址（在eax寄存器）
-;进入内核
-;call 0x08:eax
-;loadkernel:
-;	mov ebx,KERNEL_SECTOR
-;	mov cl,KERNEL_SIZE
-;	mov edi,KERNEL_VADDR
-;	call read_disk
-;cmp eax,0	;如果返回值为0，说明没有加载内核
-;je spin
-call LK_ADDR
-
+	
+cli
+call LK_ADDR	;切换到load_kernel程序
 cmp eax,0
 je not_load_kernel
-
 ;映射堆栈，将内核后一块内存作为堆栈
 mov edx,eax
 mov ecx,KERNEL_STACK_SIZE/PGSIZE;
@@ -244,7 +239,10 @@ mov eax,KERNEL_STACK_PADDR or PG_P or PG_RWW or PG_USS
 	add ebx,4
 	add eax,0x1000
 	loop @b
+
 mov esp,KERNEL_STACK_VBOTADDR	;修改堆栈
+
+
 call edx	;将控制权交给内核
 
 spin:
