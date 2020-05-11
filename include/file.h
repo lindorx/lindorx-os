@@ -35,3 +35,9 @@ FILE *fopen(const char *filename, const char *mode);
 size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream);
 
 extern int fstream_buf_flag;
+
+//stream：文件；offset：偏移偏移量；fromwhere：偏移起始位置
+int fseek(FILE *stream, long offset, int fromwhere);
+#define SEEK_SET  1   //从文件的开头向后偏移
+#define SEEK_CUR  2   //从当前位置向后偏移
+#define SEEK_END  3   //从文件的末尾向前偏移

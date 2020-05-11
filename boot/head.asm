@@ -240,7 +240,7 @@ mov eax,KERNEL_STACK_PADDR or PG_P or PG_RWW or PG_USS
 	add eax,0x1000
 	loop @b
 
-mov esp,KERNEL_STACK_VBOTADDR	;修改堆栈
+mov esp,KERNEL_STACK_VADDR	;修改堆栈
 
 
 call edx	;将控制权交给内核

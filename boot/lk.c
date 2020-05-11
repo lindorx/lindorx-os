@@ -1,10 +1,8 @@
 
 //本文件用来加载elf格式的内核
-//void load_kernel(char *src);
 #include<elf32.h>
 #include<_asm.h>
 
-#include<string.h>
 typedef unsigned char uchar;
 #define SECTSIZE 512
 #define _KERNEL_ADDR 0x580000   //内核elf文件被加载地址
@@ -17,7 +15,6 @@ char *load_kernel()
         Elf32_Ehdr *elf;
         Elf32_Phdr *ph,*eph;
         uchar* pa;
-        //void (*entry)(void);
         elf=(Elf32_Ehdr*)_KERNEL_ADDR;
         //加载elf头
         readseg((uchar*)elf, 4096, 0);

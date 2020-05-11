@@ -136,3 +136,27 @@ size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream)
         }
         return rsz;
 }
+
+//stream：文件；offset：偏移偏移量；fromwhere：偏移起始位置
+int fseek(FILE *stream, long offset, int fromwhere)
+{
+        //起始就是该表_ptr值，此值为文件下一步要操作的地址
+        if(offset<0)//偏移值超过2G
+                return offset;
+        offset=offset>stream->_bufsiz?stream->_bufsiz:offset;//将offset修改为合适大小
+        switch(fromwhere){
+                case SEEK_SET:{//从文件开头偏移
+                        stream->_ptr=stream->_base+offset;
+                }break;
+                case SEEK_CUR:{//从当前位置偏移
+                        stream->_ptr=stream->_base+offset>stream->_cnt?stream->_cnt:offset;
+                }break;
+                case SEEK_END:{//从文件尾部偏移
+                        stream->_ptr=stream->_base+stream->_bufsiz-offset;
+                }break;
+                default:
+                        return -1;
+        }
+        stream->_cnt=stream->_ptr-stream->_base;
+        return 0;
+}
